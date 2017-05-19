@@ -1,11 +1,16 @@
+#include <SparkFunMAX31855k.h>
+#include <SPI.h>
+
 char pwm = 0;
 unsigned long lastTime = 0;
+
+
 
 #if defined(ARDUINO_AVR_UNO)
 
 #define VALVE1 11 //3 Way
 #define VALVE2 10 //2 Way
-#define VALVE3 9
+#define VALVE3 9 //
 #define VALVE4 6
 
 #define PUMPRELAY 8
@@ -13,6 +18,10 @@ unsigned long lastTime = 0;
 
 #define SWITCHSTATE1 5
 #define SWITCHSTATE2 4
+
+#define CHIP_SELECT_PIN 10 // Using standard CS line (SS) for thermocouple reader
+#define VCC 12 // SPI Reference
+#define GND 13 // SPI Reference
 
 #elif defined(ARDUINO_AVR_MEGA2560)
 //Mega 2560 specific code
@@ -27,11 +36,18 @@ unsigned long lastTime = 0;
 #define SWITCHSTATE1 22
 #define SWITCHSTATE2 23
 
+#define CHIP_SELECT_PIN 53 // Using standard CS line (SS) for thermocouple reader
+#define VCC 48 // SPI Reference
+#define GND 49 // SPI Reference
+
 #else
 #error Unsupported hardware
 #endif
 
-int controlSource = 0; //By default, the switch controls the functionality
+//Instantiate the thermocouple class
+SparkFunMAX31855k probe(CHIP_SELECT_PIN, VCC, GND);
+int response = 0;
+float currentTemp = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -56,22 +72,29 @@ void setup() {
   digitalWrite(HEATRELAY, LOW);
   lastTime = millis();
 
-  if (digitalRead(SWITCHSTATE1) == LOW){
-    controlSource = 1; //If the switch is in the triggered state, this signals computer control  
+  //Wait for thermocouple sensor to stabilize
+  delay(750);
+  //Read Cold Junction Temperature
+  float temperature = probe.readCJT();
+  if (!isnan(temperature)) {
+    Serial.print("CJT is (˚C): ");
+    Serial.println(temperature);
   }
+
 }
 
-void loop() {
+void loop(){
+
+  //Read Sensor State
+  currentTemp = probe.readTempC();
   
   // put your main code here, to run repeatedly:
   int response = Serial.readString().toInt();
-  Serial.print("1:");
-  Serial.println(digitalRead(SWITCHSTATE1));
-  Serial.print("2:");
-  Serial.println(digitalRead(SWITCHSTATE2));
-  Serial.print("ControlSource:");
-  Serial.println(controlSource);
-  if (response == 1 && !controlSource || digitalRead(SWITCHSTATE1) && controlSource){
+  Serial.print("Response: ");
+  Serial.println(response);
+  Serial.print("Temperature: ");
+  Serial.println(currentTemp);
+  if (response == 1 ){
     //Release Oxygen:
     //*PUMP ON
     //*HEATING ON
@@ -85,12 +108,12 @@ void loop() {
     closeValve(VALVE2);
     //Wait a few seconds to clear any air
     lastTime = millis();
-    while(millis() - lastTime < (unsigned long)5000*64);
+    while(millis() - lastTime < (unsigned long)30000*64);
     
     openValve(VALVE1);
     startPump();
   }
-  else if (response == 2 && !controlSource|| digitalRead(SWITCHSTATE2) && controlSource){
+  else if (response == 2 ){
     //Regenerate Oxygen:
     //*PUMP ON
     //*HEATING OFF
@@ -108,6 +131,9 @@ void loop() {
     closeValve(VALVE1);
     closeValve(VALVE2);
   }
+
+  //Wait for the thermocouple
+  //delay(750);
 }
 
 void startHeating(){
