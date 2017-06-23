@@ -4,8 +4,6 @@
 char pwm = 0;
 unsigned long lastTime = 0;
 
-
-
 #if defined(ARDUINO_AVR_UNO)
 
 #define VALVE1 11 //3 Way
@@ -64,8 +62,8 @@ unsigned long lastTime = 0;
 
 #define CHIP_SELECT_PIN_A 14 // Using standard CS line (SS) for thermocouple reader
 #define CHIP_SELECT_PIN_B 15
-#define VCC 48 // SPI Reference
-#define GND 49 // SPI Reference
+#define VCC 48 // SPI Reference****???
+#define GND 49 // SPI Reference****???
 
 #else
 #error Unsupported hardware
@@ -74,6 +72,8 @@ unsigned long lastTime = 0;
 int pinoutA[4] = {HEATRELAY_A, VALVE1, VALVE2, VALVE3};
 int pinoutB[4] = {HEATRELAY_B, VALVE4, VALVE5, VALVE6};
 int* pinoutArray[2] = {pinoutA, pinoutB};
+
+int LEDS[2] = {LED1, LED2};
 
 //Instantiate the thermocouple class
 SparkFunMAX31855k probeA(CHIP_SELECT_PIN_A, VCC, GND);
@@ -84,7 +84,26 @@ float currentTemp = 0;
 
 bool POWERSTATE = false;
 bool lastPowerButtonState = 0;
-//bool lastButtonState = 0;
+bool lastb1 = false;
+bool lastb2 = false;
+bool lastb3 = false;
+bool lastb4 = false;
+unsigned long timerA = 0;
+
+int ledFrequency[2] = {0, 0}; //2 LEDs
+int ledCounter[2] = {0, 0}; //2 LEDs
+
+ISR(TIMER2_COMPA_vect){//timer1 interrupt 8kHz toggles pin 9
+//generates pulse wave of frequency 8kHz/2 = 4kHz (takes two cycles for full wave- toggle high then toggle low)
+  for (int i = 0; i < 2; i++){
+    if (ledFrequency[i] == 0){digitalWrite(LEDS[i],LOW);continue;}
+    if (ledFrequency[i] <= ledCounter[i]){
+      digitalWrite(LEDS[i], !digitalRead(LEDS[i]));
+      ledCounter[i] = 0;
+    }
+    ledCounter[i]++;
+  }
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -127,13 +146,27 @@ void setup() {
   digitalWrite(POWERLED, LOW);
   lastTime = millis();
 
+  //Setup LED indicator lights
+  TCCR2A = 0;// set entire TCCR2A register to 0
+  TCCR2B = 0;// same for TCCR2B
+  TCNT2  = 0;//initialize counter value to 0
+  // set compare match register for 8khz increments
+  OCR2A = 249;// = (16*10^6) / (8000*8) - 1 (must be <256)
+  // turn on CTC mode
+  TCCR2A |= (1 << WGM21);
+  // Set CS21 bit for 64 prescaler
+  TCCR2B |= (1 << CS22) | (1 << CS21) | (1 << CS20);   
+  // enable timer compare interrupt
+  TIMSK2 |= (1 << OCIE2A);
+  sei();
+  
   //Wait for thermocouple sensor to stabilize
   delay(750);
   //Read Cold Junction Temperature
   float temperature = probeA.readCJT();
   if (!isnan(temperature)) {
-    Serial.print("CJT is (˚C): ");
-    Serial.println(temperature);
+    //Serial.print("CJT is (˚C): ");
+    //Serial.println(temperature);
   }
 
 }
@@ -144,37 +177,61 @@ void loop(){
   //currentTemp = probeA.readTempC();
   
   // put your main code here, to run repeatedly:
-  int response = Serial.readString().toInt();
-  Serial.print("Response: ");
-  Serial.println(response);
+  //int response = Serial.readString().toInt();
+  //Serial.print("Response: ");
+  //Serial.println(response);
   //Serial.print("Temperature: ");
   //Serial.println(currentTemp);
 
   //if (response == 1) powerDevice(true);
   //if (response == 2) powerDevice(false);
 
+  if (POWERSTATE == true){
 
-  /*
-   * Poll for button presses
-   *
-  if (digitalRead(BUTTON1) | digitalRead(BUTTON2) | digitalRead(BUTTON3) | digitalRead(BUTTON4) != lastButtonState){
-    if (digitalRead(BUTTON1)){
+   /*
+    * Poll for button presses
+    */
+    bool b1 = digitalRead(BUTTON1); bool b2 = digitalRead(BUTTON2); bool b3 = digitalRead(BUTTON3); bool b4 = digitalRead(BUTTON4);
+    if (b1 != lastb1){
+      lastb1 = b1;
+      //if (lastb1){
       setState(1,0,pinoutArray);
-      setState(1,1,pinoutArray);
-    }
-    else if (digitalRead(BUTTON2)){
-      setState(2,0,pinoutArray);
-      setState(2,1,pinoutArray);
-    }
-    else if (digitalRead(BUTTON3)){
-      setState(3,0,pinoutArray);
-      setState(3,1,pinoutArray);
-    }
-    else if (digitalRead(BUTTON4)){
-      setState(4,0,pinoutArray);
       setState(4,1,pinoutArray);
+      Serial.println(1);
+      setLED(0,1);
+      delay(50);
+      //digitalWrite(LED1, !digitalRead(LED1));
     }
-  }*/
+    if (b2 != lastb2){
+      lastb2 = b2;
+      Serial.println(2);
+      //digitalWrite(LED1, !digitalRead(LED1));
+      setState(2,0,pinoutArray);
+      setState(1,1,pinoutArray);
+      setLED(0,2);
+      delay(50);
+    }
+    if (b3 != lastb3){
+      lastb3 = b3;
+      Serial.println(3);
+      //digitalWrite(LED1, !digitalRead(LED1));
+      setState(3,0,pinoutArray);
+      setState(2,1,pinoutArray);
+      setLED(0,3);
+      delay(50);
+    }
+    if (b4 != lastb4){
+      lastb4 = b4;
+      setState(4,0,pinoutArray);
+      setState(3,1,pinoutArray);
+      Serial.println(4);
+      //digitalWrite(LED1, !digitalRead(LED1));
+      setLED(0,4);
+      delay(50);
+    }
+
+    
+  }
   //Poll Power Button for presses
   if (digitalRead(POWERBUTTON) != lastPowerButtonState){
     lastPowerButtonState = digitalRead(POWERBUTTON);
@@ -195,18 +252,40 @@ void powerDevice(bool turnOn){
     setState(1,0,pinoutArray);
     setState(1,1,pinoutArray);
     POWERSTATE = true;
+    lastb1 = digitalRead(BUTTON1);
+    lastb2 = digitalRead(BUTTON2);
+    lastb3 = digitalRead(BUTTON3);
+    lastb4 = digitalRead(BUTTON4);
   }
   else if (turnOn == false && POWERSTATE == true){
     //Turn off device
     digitalWrite(POWERLED, LOW);
-    //setState(5,0,pinoutArray);
-    //setState(5,1,pinoutArray);
+    setState(5,0,pinoutArray);
+    setState(5,1,pinoutArray);
+    setLED(0,5);
     POWERSTATE = false;
     
   }
   
 }
 
+void setLED(int ledNum, int state){
+  if (state == 1){
+    ledFrequency[ledNum] = 32;
+  }
+  else if (state == 2){
+    ledFrequency[ledNum] = 16;
+  }
+  else if (state == 3){
+    ledFrequency[ledNum] = 4;
+  }
+  else if (state == 4){
+    ledFrequency[ledNum] = 1;
+  }
+  else{
+    ledFrequency[ledNum] = 0;
+  }
+}
 
 void setState(int state, int tube, int** peripheralArray){
     if (state == 1){
@@ -236,7 +315,7 @@ void setState(int state, int tube, int** peripheralArray){
       openValve(peripheralArray[tube][3]);
     }
     else if (state == 3){
-      //Releasing Oxygen:
+      //Releasing Oxygen for tube:
       //*PUMP ON
       //*HEATING ON
       //*VALVE1 Closed
