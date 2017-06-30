@@ -196,7 +196,7 @@ void loop(){
       lastb1 = b1;
       //if (lastb1){
       setState(1,0,pinoutArray);
-      setState(4,1,pinoutArray);
+      setState(1,1,pinoutArray);
       Serial.println(1);
       setLED(0,1);
       delay(50);
@@ -207,7 +207,7 @@ void loop(){
       Serial.println(2);
       //digitalWrite(LED1, !digitalRead(LED1));
       setState(2,0,pinoutArray);
-      setState(1,1,pinoutArray);
+      setState(2,1,pinoutArray);
       setLED(0,2);
       delay(50);
     }
@@ -216,14 +216,14 @@ void loop(){
       Serial.println(3);
       //digitalWrite(LED1, !digitalRead(LED1));
       setState(3,0,pinoutArray);
-      setState(2,1,pinoutArray);
+      setState(3,1,pinoutArray);
       setLED(0,3);
       delay(50);
     }
     if (b4 != lastb4){
       lastb4 = b4;
       setState(4,0,pinoutArray);
-      setState(3,1,pinoutArray);
+      setState(4,1,pinoutArray);
       Serial.println(4);
       //digitalWrite(LED1, !digitalRead(LED1));
       setLED(0,4);
@@ -308,7 +308,7 @@ void setState(int state, int tube, int** peripheralArray){
       //*VALVE1 Closed
       //*VALVE2 Closed (Not implemented yet)
       //*VALVE3 Open (3-way valve - Open towards balloon)
-      startPump();
+      stopPump();
       startHeating(peripheralArray[tube][0]);
       closeValve(peripheralArray[tube][1]);
       closeValve(peripheralArray[tube][2]);
@@ -322,7 +322,7 @@ void setState(int state, int tube, int** peripheralArray){
       //*VALVE2 Open (Not implemented yet)
       //*VALVE3 Open (3-way valve - Open towards balloon)
       startPump();
-      stopHeating(peripheralArray[tube][0]);
+      startHeating(peripheralArray[tube][0]);
       closeValve(peripheralArray[tube][1]);
       openValve(peripheralArray[tube][2]);
       openValve(peripheralArray[tube][3]);
