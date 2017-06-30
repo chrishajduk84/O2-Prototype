@@ -289,55 +289,55 @@ void setLED(int ledNum, int state){
 
 void setState(int state, int tube, int** peripheralArray){
     if (state == 1){
-      //Pump for negative pressure (get as much air out as possible)
-      //*PUMP ON
-      //*HEATING OFF
+      //Start Heating
+      //*PUMP OFF
+      //*HEATING ON
       //*VALVE1 Closed
       //*VALVE2 Open (Not implemented yet)
-      //*VALVE3 Closed (3-way valve - Open towards environment)
-      startPump();
-      stopHeating(peripheralArray[tube][0]);
+      //*VALVE3 Open (3-way valve - Open towards user)
+      stopPump();
+      startHeating(peripheralArray[tube][0]);
       closeValve(peripheralArray[tube][1]);
       openValve(peripheralArray[tube][2]);
-      closeValve(peripheralArray[tube][3]);
+      openValve(peripheralArray[tube][3]);
     }
     else if (state == 2){
-      //Start Preheating
+      //Start Pumping, open valve
       //*PUMP ON
       //*HEATING ON
       //*VALVE1 Closed
       //*VALVE2 Closed (Not implemented yet)
       //*VALVE3 Open (3-way valve - Open towards balloon)
-      stopPump();
+      startPump();
       startHeating(peripheralArray[tube][0]);
-      closeValve(peripheralArray[tube][1]);
+      openValve(peripheralArray[tube][1]);
       closeValve(peripheralArray[tube][2]);
       openValve(peripheralArray[tube][3]);
     }
     else if (state == 3){
-      //Releasing Oxygen for tube:
-      //*PUMP ON
-      //*HEATING ON
+      //This does nothing:
+      //*PUMP OFF
+      //*HEATING OFF
       //*VALVE1 Closed
-      //*VALVE2 Open (Not implemented yet)
-      //*VALVE3 Open (3-way valve - Open towards balloon)
-      startPump();
-      startHeating(peripheralArray[tube][0]);
+      //*VALVE2 Close (Not implemented yet)
+      //*VALVE3 Closed (3-way valve - Open towards balloon)
+      stopPump();
+      stopHeating(peripheralArray[tube][0]);
       closeValve(peripheralArray[tube][1]);
-      openValve(peripheralArray[tube][2]);
-      openValve(peripheralArray[tube][3]);
+      closeValve(peripheralArray[tube][2]);
+      closeValve(peripheralArray[tube][3]);
     }
     else if (state == 4){
-      //Regenerating Oxygen:
+      //This does nothing (with the pump ON):
       //*PUMP ON
       //*HEATING OFF
-      //*VALVE1 Open
-      //*VALVE2 Open (Not implemented yet)
+      //*VALVE1 Close
+      //*VALVE2 Closed (Not implemented yet)
       //*VALVE3 Closed (3-way valve - Open towards environment)
       startPump();
       stopHeating(peripheralArray[tube][0]);
-      openValve(peripheralArray[tube][1]);
-      openValve(peripheralArray[tube][2]);
+      closeValve(peripheralArray[tube][1]);
+      closeValve(peripheralArray[tube][2]);
       closeValve(peripheralArray[tube][3]);
   }
   else if (state == 5){
