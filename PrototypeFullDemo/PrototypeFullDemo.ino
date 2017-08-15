@@ -1,9 +1,9 @@
-#include <SparkFunMAX31855k.h>
-#include <SPI.h>
+//#include <SparkFunMAX31855k.h>
+//#include <SPI.h>
 
 char pwm = 0;
 unsigned long lastTime = 0;
-
+/*
 #if defined(ARDUINO_AVR_UNO)
 
 #define VALVE1 11 //3 Way
@@ -39,6 +39,7 @@ unsigned long lastTime = 0;
 #define GND 49 // SPI Reference
 
 #elif defined(ARDUINO_AVR_NANO) //UPDATED pin list for new PCB:
+*/
 #define VALVE1 3  // 2-way
 #define VALVE2 5  // 2-way
 #define VALVE3 6  // 3-way
@@ -62,20 +63,20 @@ unsigned long lastTime = 0;
 #define CHIP_SELECT_PIN_B 15
 #define VCC 48 // SPI Reference****???
 #define GND 49 // SPI Reference****???
-
+/*
 #else
 #error Unsupported hardware
 #endif
-
+*/
 int pinoutA[4] = {HEATRELAY_A, VALVE1, VALVE2, VALVE3};
 int pinoutB[4] = {HEATRELAY_B, VALVE4, VALVE5, VALVE6};
 int* pinoutArray[2] = {pinoutA, pinoutB};
 
-
+/*
 //Instantiate the thermocouple class
 SparkFunMAX31855k probeA(CHIP_SELECT_PIN_A, VCC, GND);
 SparkFunMAX31855k probeB(CHIP_SELECT_PIN_B, VCC, GND);
-
+*/
 int response = 0;
 float currentTemp = 0;
 
@@ -86,19 +87,19 @@ unsigned long timerA = 0;
 
 int ledFrequency[2] = {0, 0}; //2 LEDs
 int ledCounter[2] = {0, 0}; //2 LEDs
-
+/*
 ISR(TIMER2_COMPA_vect){//timer1 interrupt 8kHz toggles pin 9
 //generates pulse wave of frequency 8kHz/2 = 4kHz (takes two cycles for full wave- toggle high then toggle low)
   for (int i = 0; i < 2; i++){
     if (ledFrequency[i] == 0){digitalWrite(LEDS[i],LOW);continue;}
     if (ledFrequency[i] <= ledCounter[i]){
-      digitalWrite(LEDS[i], !digitalRead(LEDS[i]));
+      //digitalWrite(LEDS[i], !digitalRead(LEDS[i]));
       ledCounter[i] = 0;
     }
     ledCounter[i]++;
   }
 }
-
+*/
 void setup() {
   // put your setup code here, to run once:
   //Serial.begin(115200);
@@ -156,13 +157,11 @@ void setup() {
   //Wait for thermocouple sensor to stabilize
   delay(750);
   //Read Cold Junction Temperature
-  float temperature = probeA.readCJT();
-  if (!isnan(temperature)) {
+//  float temperature = probeA.readCJT();
+//  if (!isnan(temperature)) {
     //Serial.print("CJT is (˚C): ");
     //Serial.println(temperature);
   }
-
-}
 
 void loop(){
 
@@ -386,7 +385,7 @@ void closeValve(int pinNum){
   }
 }
 
-#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
+//#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
 void setPwmFrequency(int pin, int divisor) {
   byte mode;
   if(pin == 5 || pin == 6 || pin == 9 || pin == 10) {
@@ -417,6 +416,7 @@ void setPwmFrequency(int pin, int divisor) {
     TCCR2B = TCCR2B & 0b11111000 | mode;
   }
 }
+/*
 #elif defined(ARDUINO_AVR_MEGA2560)
 void setPwmFrequency(int pin, int divisor) {
   byte mode;
@@ -441,3 +441,4 @@ void setPwmFrequency(int pin, int divisor) {
     }
 }
 #endif
+*/
