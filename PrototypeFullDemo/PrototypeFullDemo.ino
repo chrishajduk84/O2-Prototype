@@ -38,23 +38,20 @@ unsigned long lastTime = 0;
 #define VCC 48 // SPI Reference
 #define GND 49 // SPI Reference
 
-#elif defined(ARDUINO_AVR_NANO)
-#define VALVE1 3
-#define VALVE2 -1
-#define VALVE3 5
-#define VALVE4 6
-#define VALVE5 -1
-#define VALVE6 9
+#elif defined(ARDUINO_AVR_NANO) //UPDATED pin list for new PCB:
+#define VALVE1 3  // 2-way
+#define VALVE2 5  // 2-way
+#define VALVE3 6  // 3-way
+#define VALVE4 9  // 2-way
+#define VALVE5 10 // 2-way
+#define VALVE6 11 // 3-way
 
 #define PUMPRELAY 4
 #define HEATRELAY_A 7
 #define HEATRELAY_B 8
 
-#define BUTTON1 16
-#define BUTTON2 17
-#define BUTTON3 18
-#define BUTTON4 19
-#define POWERBUTTON 2
+#define STATEBUTTON 17
+#define POWERBUTTON 16
 
 #define LED1 10
 #define LED2 11
