@@ -53,8 +53,9 @@ unsigned long lastTime = 0;
 #define STATEBUTTON 17
 #define POWERBUTTON 16
 
-#define LED1 10
-#define LED2 11
+#define LEDBLUE 18
+#define LEDGREEN 19
+#define LEDRED 20
 #define POWERLED 1
 
 #define CHIP_SELECT_PIN_A 14 // Using standard CS line (SS) for thermocouple reader
@@ -70,7 +71,6 @@ int pinoutA[4] = {HEATRELAY_A, VALVE1, VALVE2, VALVE3};
 int pinoutB[4] = {HEATRELAY_B, VALVE4, VALVE5, VALVE6};
 int* pinoutArray[2] = {pinoutA, pinoutB};
 
-int LEDS[2] = {LED1, LED2};
 
 //Instantiate the thermocouple class
 SparkFunMAX31855k probeA(CHIP_SELECT_PIN_A, VCC, GND);
@@ -81,10 +81,7 @@ float currentTemp = 0;
 
 bool POWERSTATE = false;
 bool lastPowerButtonState = 0;
-bool lastb1 = false;
-bool lastb2 = false;
-bool lastb3 = false;
-bool lastb4 = false;
+
 unsigned long timerA = 0;
 
 int ledFrequency[2] = {0, 0}; //2 LEDs
@@ -114,13 +111,11 @@ void setup() {
   pinMode(PUMPRELAY, OUTPUT);
   pinMode(HEATRELAY_A, OUTPUT);
   pinMode(HEATRELAY_B, OUTPUT);
-  pinMode(BUTTON1, INPUT);
-  pinMode(BUTTON2, INPUT);
-  pinMode(BUTTON3, INPUT);
-  pinMode(BUTTON4, INPUT);
+  pinMode(STATEBUTTON, INPUT);
   pinMode(POWERBUTTON, INPUT);
-  pinMode(LED1, OUTPUT);
-  pinMode(LED2, OUTPUT);
+  pinMode(LEDBLUE, OUTPUT);
+  pinMode(LEDGREEN, OUTPUT);
+  pinMode(LEDRED, OUTPUT);
   pinMode(POWERLED, OUTPUT);
   setPwmFrequency(VALVE1, 1); //Frequency with divisor = 1; 31250Hz
   setPwmFrequency(VALVE2, 1); //Frequency with divisor = 1; 31250Hz
@@ -138,8 +133,9 @@ void setup() {
   digitalWrite(PUMPRELAY, LOW);
   digitalWrite(HEATRELAY_A, LOW);
   digitalWrite(HEATRELAY_B, LOW);
-  digitalWrite(LED1, LOW);
-  digitalWrite(LED2, LOW);
+  digitalWrite(LEDBLUE, LOW);
+  digitalWrite(LEDGREEN, LOW);
+  digitalWrite(LEDRED, LOW);
   digitalWrite(POWERLED, LOW);
   lastTime = millis();
 
@@ -188,52 +184,54 @@ void loop(){
    /*
     * Poll for button presses
     */
-    bool b1 = digitalRead(BUTTON1); bool b2 = digitalRead(BUTTON2); bool b3 = digitalRead(BUTTON3); bool b4 = digitalRead(BUTTON4);
-    if (b1 != lastb1){
-      lastb1 = b1;
-      //if (lastb1){
+
+    int pressedCount = 0; //how many times the statebutton has been pressed
+    
+    if (digitalRead(STATEBUTTON) == LOW) //if state button is pressed
+    {
+      while(digitalRead(STATEBUTTON) == LOW)
+      {} //do nothing while button is held down - avoids skipping states
+      pressedCount++;
+
+      if (pressedCount > 4)
+        pressedCount = 0;
+    }
+    
+    if (pressedCount == 1){
       setState(1,0,pinoutArray);
       setState(1,1,pinoutArray);
       Serial.println(1);
-      setLED(0,1);
+      setLED(1);
       delay(50);
-      //digitalWrite(LED1, !digitalRead(LED1));
     }
-    if (b2 != lastb2){
-      lastb2 = b2;
+    if (pressedCount == 2){
       Serial.println(2);
-      //digitalWrite(LED1, !digitalRead(LED1));
       setState(2,0,pinoutArray);
       setState(2,1,pinoutArray);
-      setLED(0,2);
+      setLED(2);
       delay(50);
     }
-    if (b3 != lastb3){
-      lastb3 = b3;
+    if (pressedCount == 3){
       Serial.println(3);
-      //digitalWrite(LED1, !digitalRead(LED1));
       setState(3,0,pinoutArray);
       setState(3,1,pinoutArray);
-      setLED(0,3);
+      setLED(3);
       delay(50);
     }
-    if (b4 != lastb4){
-      lastb4 = b4;
+    if (pressedCount == 4){
       setState(4,0,pinoutArray);
       setState(4,1,pinoutArray);
       Serial.println(4);
-      //digitalWrite(LED1, !digitalRead(LED1));
-      setLED(0,4);
+      setLED(4);
       delay(50);
     }
 
-    
   }
   //Poll Power Button for presses
   if (digitalRead(POWERBUTTON) != lastPowerButtonState){
     lastPowerButtonState = digitalRead(POWERBUTTON);
     if(lastPowerButtonState){
-      digitalWrite(LED1, !digitalRead(LED1));
+      //digitalWrite(LED1, !digitalRead(LED1));
       powerDevice(!POWERSTATE);
     }
   }
@@ -249,38 +247,42 @@ void powerDevice(bool turnOn){
     setState(1,0,pinoutArray);
     setState(1,1,pinoutArray);
     POWERSTATE = true;
-    lastb1 = digitalRead(BUTTON1);
-    lastb2 = digitalRead(BUTTON2);
-    lastb3 = digitalRead(BUTTON3);
-    lastb4 = digitalRead(BUTTON4);
+
   }
   else if (turnOn == false && POWERSTATE == true){
     //Turn off device
     digitalWrite(POWERLED, LOW);
     setState(5,0,pinoutArray);
     setState(5,1,pinoutArray);
-    setLED(0,5);
+    setLED(5);
     POWERSTATE = false;
     
   }
   
 }
 
-void setLED(int ledNum, int state){
+void setRGB(bool red, bool green, bool blue)
+{
+  digitalWrite(LEDRED, red);
+  digitalWrite(LEDGREEN, green);
+  digitalWrite(LEDBLUE, blue);
+}
+
+void setLED(int state){
   if (state == 1){
-    ledFrequency[ledNum] = 32;
+    setRGB(LOW, LOW, HIGH); //STATE 1 -> BLUE
   }
   else if (state == 2){
-    ledFrequency[ledNum] = 16;
+    setRGB(HIGH, LOW, LOW); //STATE 2 -> RED
   }
   else if (state == 3){
-    ledFrequency[ledNum] = 4;
+    setRGB(LOW, HIGH, LOW); //STATE 3 -> GREEN
   }
   else if (state == 4){
-    ledFrequency[ledNum] = 1;
+    setRGB(HIGH, HIGH, LOW); //STATE 4 -> YELLOW
   }
   else{
-    ledFrequency[ledNum] = 0;
+    setRGB(LOW,LOW,LOW);
   }
 }
 
