@@ -84,6 +84,8 @@ bool POWERSTATE = false;
 bool lastPowerButtonState = 0;
 bool lastState;
 
+int pressedCount = 0; //how many times the statebutton has been pressed
+
 unsigned long timerA = 0;
 
 //int ledFrequency[2] = {0, 0}; //2 LEDs
@@ -184,47 +186,45 @@ void loop(){
 
   if (POWERSTATE == true){
 
-   /*
-    * Poll for button presses
-    */
+    //Poll for button presses
 
-    int pressedCount = 0; //how many times the statebutton has been pressed
-    
+     if (pressedCount > 4)
+        pressedCount = 0;
+   
     if (digitalRead(STATEBUTTON) != lastState) //if state button is pressed
     {
+      lastState = !lastState;
       pressedCount++;
-
-      if (pressedCount > 4)
-        pressedCount = 0;
-    }
+      delay(500);
     
     if (pressedCount == 1){
-    //  setState(1,0,pinoutArray);
-    //  setState(1,1,pinoutArray);
+      setState(1,0,pinoutArray);
+      setState(1,1,pinoutArray);
         flashState(1);
     //  setLED(1);
       delay(50);
     }
     if (pressedCount == 2){
       flashState(2);
-    //  setState(2,0,pinoutArray);
-    //  setState(2,1,pinoutArray);
+      setState(2,0,pinoutArray);
+      setState(2,1,pinoutArray);
     //  setLED(2);
       delay(50);
     }
     if (pressedCount == 3){
       flashState(3);
-    //  setState(3,0,pinoutArray);
-    //  setState(3,1,pinoutArray);
+      setState(3,0,pinoutArray);
+      setState(3,1,pinoutArray);
     //  setLED(3);
       delay(50);
     }
     if (pressedCount == 4){
-    //  setState(4,0,pinoutArray);
-    //  setState(4,1,pinoutArray);
+      setState(4,0,pinoutArray);
+      setState(4,1,pinoutArray);
       flashState(4);
     //  setLED(4);
       delay(50);
+    }
     }
 
   }
@@ -247,9 +247,9 @@ void flashState(int pressedCount)
   for(int i = 0; i < pressedCount; i++)
   {
     digitalWrite(POWERLED, HIGH);
-    delay(1000);
+    delay(10000);
     digitalWrite(POWERLED, LOW);
-    delay(1000);
+    delay(10000);
   }
   digitalWrite(POWERLED, HIGH);
 }
@@ -279,11 +279,16 @@ void powerDevice(){
       digitalWrite(POWERLED, HIGH);
       POWERSTATE = true;
       delay(100000);
+      setState(1,0,pinoutArray);
+      setState(1,1,pinoutArray);
+      pressedCount = 0;
     }
     else
     {
       digitalWrite(POWERLED, LOW);
       POWERSTATE = false;
+      setState(5,0,pinoutArray);
+      setState(5,1,pinoutArray);
       delay(100000);
     }
     delay(500);
@@ -330,7 +335,7 @@ void setState(int state, int tube, int** peripheralArray){
     }
     else if (state == 2){
       //Start Preheating
-      //*PUMP ON
+      //*PUMP OFF
       //*HEATING ON
       //*VALVE1 Closed
       //*VALVE2 Closed (Not implemented yet)
@@ -399,19 +404,19 @@ void stopPump(){
   digitalWrite(PUMPRELAY, LOW);
 }
 
-void openValve(int pinNum){
+void openValve(int pinNum){/*
   if (pinNum >= 0){
     analogWrite(pinNum, 255);
     lastTime = millis();
     while(millis() - lastTime < (unsigned long)1000*64);
     analogWrite(pinNum, 127);
-  }
+  }*/
 }
 
-void closeValve(int pinNum){
+void closeValve(int pinNum){/*
   if (pinNum >= 0){
     analogWrite(pinNum, 0);
-  }
+  }*/
 }
 
 //#if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO)
