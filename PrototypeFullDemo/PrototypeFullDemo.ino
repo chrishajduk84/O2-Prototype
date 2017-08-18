@@ -1,5 +1,5 @@
-//#include <SparkFunMAX31855k.h>
-//#include <SPI.h>
+#include <SparkFunMAX31855k.h>
+#include <SPI.h>
 
 char pwm = 0;
 unsigned long lastTime = 0;
@@ -61,8 +61,8 @@ unsigned long lastTime = 0;
 
 #define CHIP_SELECT_PIN_A 14 // Using standard CS line (SS) for thermocouple reader
 #define CHIP_SELECT_PIN_B 15
-#define VCC 48 // SPI Reference****???
-#define GND 49 // SPI Reference****???
+#define VCC 256 // SPI Reference****???
+#define GND 256 // SPI Reference****???
 /*
 #else
 #error Unsupported hardware
@@ -82,11 +82,12 @@ float currentTemp = 0;
 
 bool POWERSTATE = false;
 bool lastPowerButtonState = 0;
+bool lastState;
 
 unsigned long timerA = 0;
 
-int ledFrequency[2] = {0, 0}; //2 LEDs
-int ledCounter[2] = {0, 0}; //2 LEDs
+//int ledFrequency[2] = {0, 0}; //2 LEDs
+//int ledCounter[2] = {0, 0}; //2 LEDs
 /*
 ISR(TIMER2_COMPA_vect){//timer1 interrupt 8kHz toggles pin 9
 //generates pulse wave of frequency 8kHz/2 = 4kHz (takes two cycles for full wave- toggle high then toggle low)
@@ -140,6 +141,7 @@ void setup() {
   digitalWrite(POWERLED, LOW);
   lastTime = millis();
 
+/*
   //Setup LED indicator lights
   TCCR2A = 0;// set entire TCCR2A register to 0
   TCCR2B = 0;// same for TCCR2B
@@ -161,6 +163,8 @@ void setup() {
 //  if (!isnan(temperature)) {
     //Serial.print("CJT is (˚C): ");
     //Serial.println(temperature);
+*/
+    lastState = digitalRead(STATEBUTTON);
   }
 
 void loop(){
@@ -186,10 +190,8 @@ void loop(){
 
     int pressedCount = 0; //how many times the statebutton has been pressed
     
-    if (digitalRead(STATEBUTTON) == LOW) //if state button is pressed
+    if (digitalRead(STATEBUTTON) != lastState) //if state button is pressed
     {
-      while(digitalRead(STATEBUTTON) == LOW)
-      {} //do nothing while button is held down - avoids skipping states
       pressedCount++;
 
       if (pressedCount > 4)
@@ -197,49 +199,63 @@ void loop(){
     }
     
     if (pressedCount == 1){
-      setState(1,0,pinoutArray);
-      setState(1,1,pinoutArray);
-      Serial.println(1);
-      setLED(1);
+    //  setState(1,0,pinoutArray);
+    //  setState(1,1,pinoutArray);
+        flashState(1);
+    //  setLED(1);
       delay(50);
     }
     if (pressedCount == 2){
-      Serial.println(2);
-      setState(2,0,pinoutArray);
-      setState(2,1,pinoutArray);
-      setLED(2);
+      flashState(2);
+    //  setState(2,0,pinoutArray);
+    //  setState(2,1,pinoutArray);
+    //  setLED(2);
       delay(50);
     }
     if (pressedCount == 3){
-      Serial.println(3);
-      setState(3,0,pinoutArray);
-      setState(3,1,pinoutArray);
-      setLED(3);
+      flashState(3);
+    //  setState(3,0,pinoutArray);
+    //  setState(3,1,pinoutArray);
+    //  setLED(3);
       delay(50);
     }
     if (pressedCount == 4){
-      setState(4,0,pinoutArray);
-      setState(4,1,pinoutArray);
-      Serial.println(4);
-      setLED(4);
+    //  setState(4,0,pinoutArray);
+    //  setState(4,1,pinoutArray);
+      flashState(4);
+    //  setLED(4);
       delay(50);
     }
 
   }
   //Poll Power Button for presses
-  if (digitalRead(POWERBUTTON) != lastPowerButtonState){
-    lastPowerButtonState = digitalRead(POWERBUTTON);
-    if(lastPowerButtonState){
-      //digitalWrite(LED1, !digitalRead(LED1));
-      powerDevice(!POWERSTATE);
-    }
+  if(digitalRead(POWERBUTTON) == HIGH)
+  {
+    //lastPowerButtonState = digitalRead(POWERBUTTON);
+    //if(lastPowerButtonState){
+    powerDevice();
+    // }
   }
 
   //Wait for the thermocouple
   //delay(750);
 }
 
-void powerDevice(bool turnOn){
+void flashState(int pressedCount)
+{
+  digitalWrite(POWERLED, LOW);
+  for(int i = 0; i < pressedCount; i++)
+  {
+    digitalWrite(POWERLED, HIGH);
+    delay(1000);
+    digitalWrite(POWERLED, LOW);
+    delay(1000);
+  }
+  digitalWrite(POWERLED, HIGH);
+}
+
+void powerDevice(){
+  /*
   if (turnOn == true && POWERSTATE == false){
     //Turn on device
     digitalWrite(POWERLED, HIGH);
@@ -257,7 +273,20 @@ void powerDevice(bool turnOn){
     POWERSTATE = false;
     
   }
-  
+  */
+  if(POWERSTATE == false)
+    {
+      digitalWrite(POWERLED, HIGH);
+      POWERSTATE = true;
+      delay(100000);
+    }
+    else
+    {
+      digitalWrite(POWERLED, LOW);
+      POWERSTATE = false;
+      delay(100000);
+    }
+    delay(500);
 }
 
 void setRGB(bool red, bool green, bool blue)
