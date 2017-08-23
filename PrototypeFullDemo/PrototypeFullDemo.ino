@@ -72,11 +72,11 @@ int pinoutA[4] = {HEATRELAY_A, VALVE1, VALVE2, VALVE3};
 int pinoutB[4] = {HEATRELAY_B, VALVE4, VALVE5, VALVE6};
 int* pinoutArray[2] = {pinoutA, pinoutB};
 
-/*
+
 //Instantiate the thermocouple class
-SparkFunMAX31855k probeA(CHIP_SELECT_PIN_A, VCC, GND);
-SparkFunMAX31855k probeB(CHIP_SELECT_PIN_B, VCC, GND);
-*/
+SparkFunMAX31855k probeA(CHIP_SELECT_PIN_A, VCC, GND, false);
+//SparkFunMAX31855k probeB(CHIP_SELECT_PIN_B, VCC, GND);
+
 int response = 0;
 float currentTemp = 0;
 
@@ -143,6 +143,8 @@ void setup() {
   digitalWrite(POWERLED, LOW);
   lastTime = millis();
 
+  digitalWrite(CHIP_SELECT_PIN_A, LOW);
+
 /*
   //Setup LED indicator lights
   TCCR2A = 0;// set entire TCCR2A register to 0
@@ -170,9 +172,6 @@ void setup() {
   }
 
 void loop(){
-
-  //Read Sensor State
-  //currentTemp = probeA.readTempC();
   
   // put your main code here, to run repeatedly:
   //int response = Serial.readString().toInt();
@@ -188,8 +187,8 @@ void loop(){
 
     //Poll for button presses
 
-     if (pressedCount > 4)
-        pressedCount = 0;
+     if (pressedCount > 4)  //if it has run through all the cycles - repeat back to the first one
+        pressedCount = 0;  
    
     if (digitalRead(STATEBUTTON) != lastState) //if state button is pressed
     {
@@ -227,6 +226,23 @@ void loop(){
     }
     }
 
+  
+  //for testing thermocouple function:
+
+    if(pressedCount == 2)
+    {
+      //Read Sensor State
+      currentTemp = probeA.readTempC();
+      digitalWrite(CHIP_SELECT_PIN_A, LOW);
+
+      if(currentTemp > 65)
+      {
+        startPump();
+      }
+     }
+
+    //Wait for the thermocouple
+    delay(750);
   }
   //Poll Power Button for presses
   if(digitalRead(POWERBUTTON) == HIGH)
@@ -237,11 +253,10 @@ void loop(){
     // }
   }
 
-  //Wait for the thermocouple
-  //delay(750);
+
 }
 
-void flashState(int pressedCount)
+void flashState(int pressedCount) //Function flashes the power LED the number that indicates its state (for now to substitute the RGB LED)
 {
   digitalWrite(POWERLED, LOW);
   for(int i = 0; i < pressedCount; i++)
