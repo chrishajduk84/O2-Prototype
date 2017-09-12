@@ -107,7 +107,7 @@ ISR(TIMER2_COMPA_vect){//timer1 interrupt 8kHz toggles pin 9
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  //Serial.begin(115200);
   pinMode(VALVE1, OUTPUT);
   pinMode(VALVE2, OUTPUT);
   pinMode(VALVE3, OUTPUT);
@@ -170,11 +170,7 @@ void setup() {
   }
 
 }
-/*
-int alternate = 0;
-long altTime = 0;
-bool stateON = false;
-*/
+
 void loop(){
 
   //Read Sensor State
@@ -190,69 +186,7 @@ void loop(){
   //if (response == 1) powerDevice(true);
   //if (response == 2) powerDevice(false);
 
-  if (POWERSTATE == true){
-    //altTime = millis();
-   /*
-    * Poll for button presses
-    */
-    bool b1 = digitalRead(BUTTON1); bool b2 = digitalRead(BUTTON2); bool b3 = digitalRead(BUTTON3); bool b4 = digitalRead(BUTTON4);
-    if (b1 != lastb1){
-      lastb1 = b1;
-      //if (lastb1){
-      setState(1,0,pinoutArray);
-      setState(1,1,pinoutArray);
-      Serial.println(1);
-      setLED(0,1);
-      delay(50);
-      //alternate = 1;
-      //digitalWrite(LED1, !digitalRead(LED1));
-    }
-    if (b2 != lastb2){
-      lastb2 = b2;
-      Serial.println(2);
-      //digitalWrite(LED1, !digitalRead(LED1));
-      setState(2,0,pinoutArray);
-      setState(2,1,pinoutArray);
-      setLED(0,2);
-      delay(50);
-    }
-    if (b3 != lastb3){
-      lastb3 = b3;
-      Serial.println(3);
-      //digitalWrite(LED1, !digitalRead(LED1));
-      setState(3,0,pinoutArray);
-      setState(3,1,pinoutArray);
-      setLED(0,3);
-      delay(50);
-    }
-    if (b4 != lastb4){
-      lastb4 = b4;
-      setState(4,0,pinoutArray);
-      setState(4,1,pinoutArray);
-      Serial.println(4);
-      //digitalWrite(LED1, !digitalRead(LED1));
-      setLED(0,4);
-      delay(50);
-    }
 
-    /*if (alternate == 1 && altTime > 30){
-      altTime = 0;
-      stateON = !stateON;
-
-      if (!stateON){
-        setState(1,0,pinoutArray);
-        setState(1,1,pinoutArray);
-      }
-
-      if (stateON){
-        setState(3,0,pinoutArray);
-        setState(3,1,pinoutArray);
-      }
-      
-    }*/
-
-    
-  }
   //Poll Power Button for presses
   if (digitalRead(POWERBUTTON) != lastPowerButtonState){
     lastPowerButtonState = digitalRead(POWERBUTTON);
@@ -308,73 +242,7 @@ void setLED(int ledNum, int state){
   }
 }
 
-void setState(int state, int tube, int** peripheralArray){
-    if (state == 1){
-      //Start Heating
-      //*PUMP OFF
-      //*HEATING ON
-      //*VALVE1 Closed
-      //*VALVE2 Open (Not implemented yet)
-      //*VALVE3 Open (3-way valve - Open towards user)
-      stopPump();
-      startHeating(peripheralArray[tube][0]);
-      closeValve(peripheralArray[tube][1]);
-      openValve(peripheralArray[tube][2]);
-      openValve(peripheralArray[tube][3]);
-    }
-    else if (state == 2){
-      //Start Pumping, open valve
-      //*PUMP ON
-      //*HEATING ON
-      //*VALVE1 Closed
-      //*VALVE2 Closed (Not implemented yet)
-      //*VALVE3 Open (3-way valve - Open towards balloon)
-      startPump();
-      startHeating(peripheralArray[tube][0]);
-      openValve(peripheralArray[tube][1]);
-      closeValve(peripheralArray[tube][2]);
-      openValve(peripheralArray[tube][3]);
-    }
-    else if (state == 3){
-      //This does nothing:
-      //*PUMP OFF
-      //*HEATING OFF
-      //*VALVE1 Closed
-      //*VALVE2 Close (Not implemented yet)
-      //*VALVE3 Closed (3-way valve - Closed, outlet towards environment)
-      stopPump();
-      stopHeating(peripheralArray[tube][0]);
-      closeValve(peripheralArray[tube][1]);
-      closeValve(peripheralArray[tube][2]);
-      closeValve(peripheralArray[tube][3]);
-    }
-    else if (state == 4){
-      //This does nothing (with the pump ON):
-      //*PUMP ON
-      //*HEATING OFF
-      //*VALVE1 Close
-      //*VALVE2 Closed (Not implemented yet)
-      //*VALVE3 Closed (3-way valve - Open towards environment)
-      startPump();
-      stopHeating(peripheralArray[tube][0]);
-      closeValve(peripheralArray[tube][1]);
-      closeValve(peripheralArray[tube][2]);
-      closeValve(peripheralArray[tube][3]);
-  }
-  else if (state == 5){
-      //Powered off state:
-      //*PUMP OFF
-      //*HEATING OFF
-      //*VALVE1 Closed
-      //*VALVE2 Closed (Not implemented yet)
-      //*VALVE3 Closed (3-way valve - Open towards environment)
-      stopPump();
-      stopHeating(peripheralArray[tube][0]);
-      closeValve(peripheralArray[tube][1]);
-      closeValve(peripheralArray[tube][2]);
-      closeValve(peripheralArray[tube][3]);
-  }
-  
+void setState(int state, int tube, int** peripheralArray){  
 }
 
 void startHeating(int pinNum){
