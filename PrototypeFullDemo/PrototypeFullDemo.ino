@@ -61,8 +61,8 @@ unsigned long lastTime = 0;
 
 #define CHIP_SELECT_PIN_A 14 // Using standard CS line (SS) for thermocouple reader
 #define CHIP_SELECT_PIN_B 15
-#define VCC 256 // SPI Reference****???
-#define GND 256 // SPI Reference****???
+#define VCC 255 // SPI Reference****???
+#define GND 255 // SPI Reference****???
 /*
 #else
 #error Unsupported hardware
@@ -74,11 +74,12 @@ int* pinoutArray[2] = {pinoutA, pinoutB};
 
 
 //Instantiate the thermocouple class
-SparkFunMAX31855k probeA(CHIP_SELECT_PIN_A, VCC, GND, false);
-//SparkFunMAX31855k probeB(CHIP_SELECT_PIN_B, VCC, GND);
+SparkFunMAX31855k probeA(CHIP_SELECT_PIN_A, VCC, GND);
+SparkFunMAX31855k probeB(CHIP_SELECT_PIN_B, VCC, GND);
 
 int response = 0;
-float currentTemp = 0;
+float currentTempA = 0;
+float currentTempB = 0;
 
 bool POWERSTATE = false;
 bool lastPowerButtonState = 0;
@@ -105,7 +106,7 @@ ISR(TIMER2_COMPA_vect){//timer1 interrupt 8kHz toggles pin 9
 */
 void setup() {
   // put your setup code here, to run once:
-  //Serial.begin(115200);
+  Serial.begin(115200);
   pinMode(VALVE1, OUTPUT);
   pinMode(VALVE2, OUTPUT);
   pinMode(VALVE3, OUTPUT);
@@ -143,7 +144,8 @@ void setup() {
   digitalWrite(POWERLED, LOW);
   lastTime = millis();
 
-  digitalWrite(CHIP_SELECT_PIN_A, LOW);
+  //TEMP HEADER
+  Serial.println("Outer Temperature, Inner Temperature");
 
 /*
   //Setup LED indicator lights
@@ -232,10 +234,17 @@ void loop(){
     if(pressedCount == 2)
     {
       //Read Sensor State
-      currentTemp = probeA.readTempC();
-      digitalWrite(CHIP_SELECT_PIN_A, LOW);
-
-      if(currentTemp > 65)
+      currentTempA = probeA.readTempC();
+      currentTempB = probeB.readTempC();
+      char strA[10];char strB[10];
+      dtostrf(currentTempA,4,2,strA);
+      dtostrf(currentTempB,4,2,strB);
+      Serial.print(strA);
+      Serial.print(",");
+      Serial.println(strB);
+      
+      
+      if(currentTempA > 65)
       {
         startPump();
       }
