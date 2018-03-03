@@ -1,0 +1,74 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Build Folder
+build
+build/*
+
+# Any generated csv files
+*.csv
+
+# Any Swap Files
+*.swperagma solidity ^0.4.0;
+
+
+contract cryptomonFactory{
+    address owner;
+    modifier onlyBy(address _account)
+    {
+        require(msg.sender == _account);
+        // Do not forget the "_;"! It will
+        // be replaced by the actual function
+        // body when the modifier is used.
+        _;
+    }
+
+ mapping(int => uint) monsType;
+
+ function cryptomonFactory(address _createdby) public{
+     owner = _createdby;
+ }
+ 
+ void getNextMons(int locX, int locY, address walletAddress){
+    walletAddress.call(addCryptoMon)    
+ 
+ }
+ 
+ function isContract(address addr) private view returns (bool) {
+  uint size;
+  assembly { size := extcodesize(addr) }
+  return size > 0;
+}
+    
+
+}
