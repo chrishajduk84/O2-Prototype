@@ -1,0 +1,2 @@
+To convert any image resources into binary static local resources, use ImageMagick:
+> convert image.png image.h

@@ -1,5 +1,10 @@
 #include "MainWindow.h"
 #include <QTimer>
+#include <QImage>
+
+//Images:
+#include "img/DownArrow.h"
+#include "img/UpArrow.h"
 
 MainWindow::MainWindow(QWidget* parent):QWidget(parent){
      
@@ -7,10 +12,15 @@ MainWindow::MainWindow(QWidget* parent):QWidget(parent){
     QTimer::singleShot(10, this, SLOT(showFullScreen()));
     
     //Up/Down Arrows
-    QPixmap upArrow("img/UpArrow.png");
-    QPixmap downArrow("img/DownArrow.png");
-    QIcon upButtonIcon(upArrow);
-    QIcon downButtonIcon(downArrow);
+    
+    const QImage upArrow(UpArrowData,457,257,QImage::Format_RGB888);
+    const QImage downArrow(UpArrowData,257,457,QImage::Format_RGB888);//257,457
+    QPixmap upArrowPM = QPixmap::fromImage(upArrow);//("img/UpArrow.png");
+    QPixmap downArrowPM = QPixmap::fromImage(downArrow);//("img/DownArrow.png");
+    //upArrowPM.convertFromImage(upArrow);
+    //downArrowPM.convertFromImage(downArrow);
+    QIcon upButtonIcon(upArrowPM);
+    QIcon downButtonIcon(downArrowPM);
     up = new QPushButton("" ,this);
     up->setGeometry(50,40,60,60);
     up->setIcon(upButtonIcon);
