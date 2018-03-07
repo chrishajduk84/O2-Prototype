@@ -1,78 +1,52 @@
 #include "Sensors.h"
-#include <SPI.h>
+#include <wiringPiI2C.h>
+#include <math.h>
 
 Sensors::Sensors(int sensorIndex){
 	//Connect to I2C peripherals
 	
 	//ADC0 - Verify Connection
 	
-	//ADC1 - Verify Connection
-
+	//ADC1 - Verify Connection - This should happen in a separate file/class/interface
+/*
 	//Assign pointers
-pP_Abs = (P_AbsPinout + sensorIndex);
-	pP_Gauge = (P_GaugePinout + sensorIndex);
-	pTherm = (ThermPinout + sensorIndex);
-	pFlow = (FlowPinout + sensorIndex);
-	pTFlow = &TFlowPinout;
-	pO2 = &O2Pinout;
-	pO2Therm = &O2ThermPinout;
-	pHeaterCurrent = (HeaterCurrentPinout + sensorIndex);
-  thermocouple = new Adafruit_MAX31855(*pTherm);
-  csData.temperature = 30;//thermocouple->readCelsius();       //First value for rolling avg. [to prevent dividing by 0]
+	pPressure = &(pressureLocation[sensorIndex]);
+	pTemperature1 = &(temperatureLocation[0][sensorIndex]);
+	pTemperature2 = &(temperatureLocation[1][sensorIndex]);
+	pTemperature3 = &(temperatureLocation[2][sensorIndex]);
+	pRTD = &(rtdLocation[sensorIndex]);
+	pFlow = &(flowLocation[sensorIndex]);
+*/		
+	//Oxygen determine via UART
+	//SOME CODE TO CONNECT TO UART
+
+	for (int i = 0; i < 4; i++){
+  		csData.temperature[i] = 30;//thermocouple->readCelsius();       //First value for rolling avg. [to prevent dividing by 0]
+	}
 }
 
-Sensors::~Sensors(){
-  delete thermocouple;
+Sensors::~Sensors(){}
+
+float Sensors::getPressure(){
+	csData.pressure = 5;
+  	return csData.pressure;
 }
 
-float Sensors::getP_Abs(){
-	csData.pOutlet = ((analogRead(*pP_Abs)-91.80193)/27.3)-14.50;
-  return csData.pOutlet;
-}
-
-float Sensors::getP_Gauge(){
-	csData.pInlet = ((analogRead(*pP_Gauge)/1023.0)-0.04)/(0.009/0.145038);
-  return csData.pInlet;
-}
-
-float Sensors::getTherm(){
-  csData.temperature -= csData.temperature/N;               //Rolling Average
-	csData.temperature += (thermocouple->readCelsius())/N;    //[Exponentially Weighted]
-  if (isnan(csData.temperature)){csData.temperature = thermocouple->readCelsius();}  //Flushes out rolling average if "not a number" val corrupts the average
-  return csData.temperature;
+float Sensors::getTemperature(int index){
+  	csData.temperature[index] -= csData.temperature[index]/N;               //Rolling Average
+	csData.temperature[index] += 1/N;    //[Exponentially Weighted] TODO: REPLACE "1" with the thermistor reading
+  	if (isnan(csData.temperature[index])){csData.temperature[index] = 1;}  //TODO: REPLACE"1" WITH THE THERMISTOR READING - Flushes out rolling average if "not a number" val corrupts the average
+  	return csData.temperature[index];
 }
 
 float Sensors::getFlow(){
-	csData.flow = (analogRead(*pFlow)-102)/410.0;
-  return csData.flow;
-}
-
-float Sensors::getTFlow(){
-	csData.tFlow = ((analogRead(*pTFlow)/204.6)-1.2)/0.96;
-  return csData.tFlow;
+	csData.flow = 1; //TODO: REPLACE
+  	return csData.flow;
 }
 
 float Sensors::getO2(){
-	csData.O2 = (analogRead(*pO2)/(204.6*38.45*0.000585));
-  return csData.O2;
-}
-
-float Sensors::getO2Therm(){
-	THERM_RESIST = 24900*((3.30/(analogRead(*pO2Therm)/204.6))-1);
-	csData.O2Temp = (1.0/(THERM_A + THERM_B*log(THERM_RESIST) + THERM_C*pow(log(THERM_RESIST), 3))) - 273.15;
-  return csData.O2Temp;
-}
-
-float Sensors::getO2Comp(){
-	valO2 = getO2();
-	O2Therm = getO2Therm();
-	csData.O2Comp = valO2 + C3*pow(O2Therm, 3) + C2*pow(O2Therm, 2) + C1*O2Therm + C0;
-  return csData.O2Comp;
-}
-
-float Sensors::getHeaterCurrent(){
-	csData.heaterCurrent = analogRead(*pHeaterCurrent)/(204.6*200*0.01);
-  return csData.heaterCurrent;
+	csData.O2 = 1; //UART TODO REPLACE
+  	return csData.O2;
 }
 
 CartridgeSensors* Sensors::getSensorData(){
@@ -80,12 +54,11 @@ CartridgeSensors* Sensors::getSensorData(){
 }
 
 void Sensors::updateSensors(){
-  getP_Abs();
-  getP_Gauge();
-  getTherm();
-  getFlow();
-  getO2Comp();
-	
-
+	getPressure();
+	for (int i = 0; i < 4; i++){
+  		getTemperature(i);
+	}
+  	getFlow();
+  	getO2();
 }
 

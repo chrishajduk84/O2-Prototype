@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include <QTimer>
 #include <QImage>
+#include <stdio.h>
 
 //Images:
 #include "img/DownArrow.h"
@@ -43,4 +44,10 @@ MainWindow::MainWindow(QWidget* parent):QWidget(parent){
     qf2.setPointSize(20);
     oxygenfrac->setFont(qf2);
     oxygenfrac->setGeometry(220,36,90,60);
+}
+
+void MainWindow::updateO2(float percentage){
+	char o2String[5];
+	sprintf(o2String,"%.1f%%",percentage);
+	oxygenfrac->setText(o2String);
 }
