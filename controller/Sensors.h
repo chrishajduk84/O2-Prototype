@@ -7,6 +7,13 @@
 #define TEMP_3 2
 #define RTD 3
 
+typedef struct _deviceStatus{
+	bool adc0 = false;
+	bool adc1 = false;
+	bool oxygen = false;
+	
+} DeviceStatus;
+
 typedef struct _cartridgeSensors{
   float pressure; //Absolute Gauge
   float temperature[4];
@@ -15,6 +22,7 @@ typedef struct _cartridgeSensors{
 } CartridgeSensors;
 
 class Sensors {
+	DeviceStatus sensorStatus;
 	PeripheralLocation *pPressure, *pTemperature1, *pTemperature2, *pTemperature3, *pRTD, *pFlow, *pO2;
   	CartridgeSensors csData;
 	const static int N = 10; 

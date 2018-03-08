@@ -17,12 +17,14 @@ set ( SOURCES
      main.cpp
      gui/MainWindow.cpp
      controller/Sensors.cpp     
+     controller/UART.cpp
       )
 
 set ( MOC_HEADERS
        gui/MainWindow.h
        controller/Sensors.h
        controller/Pinout.h
+       controller/UART.h
       )
 #
 #   set ( UIS

@@ -1,14 +1,31 @@
 #include "Sensors.h"
+#include "UART.h"
+
 #include <wiringPiI2C.h>
 #include <math.h>
 
+
+//TEMP FOR DEBUG
+#include <iostream>
+
+#define ADC0 0b1111111
+#define ADC1 0b1111111
+
+#define ADC_VERSION_REG 0b00000000
+#define ADC_VERSION 0b00000000
+
+using namespace std;
+
 Sensors::Sensors(int sensorIndex){
 	//Connect to I2C peripherals
-	
-	//ADC0 - Verify Connection
-	
-	//ADC1 - Verify Connection - This should happen in a separate file/class/interface
-/*
+	wiringPiI2CSetup(1);	
+
+	//ADC0 - Verify Connection - check registers	
+	wiringPiI2CReadReg8(ADC0, ADC_VERSION_REG)==ADC_VERSION?sensorStatus.adc0=true:sensorStatus.adc0=false;
+
+	//ADC1 - Verify Connection - check registers
+	wiringPiI2CReadReg8(ADC1, ADC_VERSION_REG)==ADC_VERSION?sensorStatus.adc1=true:sensorStatus.adc1=false;
+
 	//Assign pointers
 	pPressure = &(pressureLocation[sensorIndex]);
 	pTemperature1 = &(temperatureLocation[0][sensorIndex]);
@@ -16,12 +33,14 @@ Sensors::Sensors(int sensorIndex){
 	pTemperature3 = &(temperatureLocation[2][sensorIndex]);
 	pRTD = &(rtdLocation[sensorIndex]);
 	pFlow = &(flowLocation[sensorIndex]);
-*/		
-	//Oxygen determine via UART
-	//SOME CODE TO CONNECT TO UART
-
+		
+	//Oxygen determine via UART - Check for connection
+	UART oxygenSensor;
+	oxygenSensor.isConnected()?sensorStatus.oxygen=true:sensorStatus.oxygen=false;
+	cout << sensorStatus.oxygen << endl;	
+	
 	for (int i = 0; i < 4; i++){
-  		csData.temperature[i] = 30;//thermocouple->readCelsius();       //First value for rolling avg. [to prevent dividing by 0]
+  		csData.temperature[i] = 30;      //First value for rolling avg. [to prevent dividing by 0]
 	}
 }
 
