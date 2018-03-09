@@ -1,5 +1,4 @@
 #include "Sensors.h"
-#include "UART.h"
 
 #include <wiringPiI2C.h>
 #include <math.h>
@@ -35,9 +34,8 @@ Sensors::Sensors(int sensorIndex){
 	pFlow = &(flowLocation[sensorIndex]);
 		
 	//Oxygen determine via UART - Check for connection
-	UART oxygenSensor;
 	oxygenSensor.isConnected()?sensorStatus.oxygen=true:sensorStatus.oxygen=false;
-	cout << sensorStatus.oxygen << endl;	
+		//List which sensors are available in DEBUG
 	
 	for (int i = 0; i < 4; i++){
   		csData.temperature[i] = 30;      //First value for rolling avg. [to prevent dividing by 0]
@@ -64,7 +62,8 @@ float Sensors::getFlow(){
 }
 
 float Sensors::getO2(){
-	csData.O2 = 1; //UART TODO REPLACE
+	char sendCommand[9] = {0x55,0xAA,0x7E,0x02,0x4F,0x43,0x94,0x0E,0x0D};
+        csData.O2 = oxygenSensor.readLine(sendCommand,9);
   	return csData.O2;
 }
 

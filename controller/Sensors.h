@@ -1,6 +1,7 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 #include "Pinout.h"
+#include "UART.h"
 
 #define TEMP_1 0
 #define TEMP_2 1
@@ -26,7 +27,9 @@ class Sensors {
 	PeripheralLocation *pPressure, *pTemperature1, *pTemperature2, *pTemperature3, *pRTD, *pFlow, *pO2;
   	CartridgeSensors csData;
 	const static int N = 10; 
- 
+
+	UART oxygenSensor;
+	 
 	public:
 	Sensors (int sensorIndex);
   	~Sensors();
