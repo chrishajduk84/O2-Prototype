@@ -43,7 +43,7 @@ UART::~UART(){
 
 void UART::openDevice(const char* device){
      struct termios port_config; //sets up termios configuration structure for the serial port
-     serial_fd = open(device, O_RDWR, O_NOCTTY);// | O_NOCTTY | O_NDELAY); //opens serial port in device slot
+     serial_fd = open(device, O_RDWR | O_NOCTTY);// | O_NOCTTY | O_NDELAY); //opens serial port in device slot
      if(serial_fd == -1)
      { //-1 is the error message for failed open port
            fprintf(stdout, "[UART] Failed to open port\n");
@@ -59,15 +59,18 @@ void UART::openDevice(const char* device){
      if (cfsetispeed(&port_config, B19200) < 0){
          cout << "[UART] Error setting input baud rate" << endl;
      }
+     //fcntl(serial_fd, F_SETFL, FNDELAY);
      port_config.c_iflag &= ~(IXANY | IXON | IXOFF); //input flags (XON/XOFF software flow control, no NL to CR translation)
-     //port_config.c_oflag = 0;
-     //port_config.c_lflag &= ~(ECHO | ECHOE | ICANON | ISIG); //local flags (no line processing, echo off, echo newline off, canonical mode off, extended input processing off, signal chars off)
+     port_config.c_oflag = 0;
+     port_config.c_lflag &= ~(ECHO | ECHOE | ICANON ); //local flags (no line processing, echo off, echo newline off, canonical mode off, extended input processing off, signal chars off)
      port_config.c_cflag &= ~(CSIZE | PARENB | CSTOPB | CRTSCTS);
-     port_config.c_cflag |= (CS8 | CLOCAL | CREAD | B19200); //Control flags (local connection, enable receivingt characters, force 8 bit input)
+     port_config.c_cflag |= (CS8 | CLOCAL | CREAD); //Control flags (local connection, enable receivingt characters, force 8 bit input)
 
-     port_config.c_cc[VMIN]  = 1;
-     port_config.c_cc[VTIME] = 0;
-     tcsetattr(serial_fd, TCSANOW, &port_config); //Sets the termios struct of the file handle fd from the options defined in options. TCSAFLUSH performs the change as soon as possible.
+     port_config.c_cc[VMIN]  = 0;
+     port_config.c_cc[VTIME] = 5;//originally 0 (instant return)
+     if (tcsetattr(serial_fd, TCSANOW, &port_config) < 0){ //Sets the termios struct of the file handle fd from the options defined in options. TCSAFLUSH performs the change as soon as possible.
+          cout << "[UART] Error setting interface parameters" << endl;
+     }
      cout << "[UART] Serial port opened on: " << device << endl;
 }
 
@@ -84,9 +87,15 @@ void UART::writeLine(char* data, int len){
 }
 
 float UART::readLine(char* sendData, int sendLen){
-     write(serial_fd, sendData, sendLen);
      unsigned char data[11];
-     int len = readLine(data);
+     int len = 0;
+     for (int i=0; i < 9; i++){ //Hardcoded value: 9 attempts at collecting data
+          write(serial_fd, sendData, sendLen);
+          len = readLine(data);
+          if (len > 0){
+               break; //The data has been collected
+          } 
+     }
      return parseLine(data,len);
 
 
@@ -110,15 +119,18 @@ int UART::readLine(unsigned char* buf){
      unsigned char data = 0;
      unsigned char lastData = 0;
      unsigned char c = 0;    
-
     
      //wait until the return character is detected - This is oxygen sensor specific
      int byteCount = 0;
      while (data != 0x0D){
+          cout << "RAWR" << endl;
           if (read(serial_fd,&c,1) > 0){
                buf[byteCount++] = c;
                data = c;
+               printf("%x", c);
           }
+          else break;
+          cout << "RAWR END" << endl;
      }   
      return byteCount;
 }
