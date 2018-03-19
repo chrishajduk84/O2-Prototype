@@ -59,10 +59,10 @@ void UART::openDevice(const char* device){
      if (cfsetispeed(&port_config, B19200) < 0){
          cout << "[UART] Error setting input baud rate" << endl;
      }
-     //fcntl(serial_fd, F_SETFL, FNDELAY);
+
      port_config.c_iflag &= ~(IXANY | IXON | IXOFF); //input flags (XON/XOFF software flow control, no NL to CR translation)
      port_config.c_oflag = 0;
-     port_config.c_lflag &= ~(ECHO | ECHOE | ICANON ); //local flags (no line processing, echo off, echo newline off, canonical mode off, extended input processing off, signal chars off)
+     port_config.c_lflag &= ~(ECHO | ECHOE | ICANON | ISIG); //local flags (no line processing, echo off, echo newline off, canonical mode off, extended input processing off, signal chars off)
      port_config.c_cflag &= ~(CSIZE | PARENB | CSTOPB | CRTSCTS);
      port_config.c_cflag |= (CS8 | CLOCAL | CREAD); //Control flags (local connection, enable receivingt characters, force 8 bit input)
 
@@ -87,7 +87,7 @@ void UART::writeLine(char* data, int len){
 }
 
 float UART::readLine(char* sendData, int sendLen){
-     unsigned char data[11];
+     unsigned char data[15];//Should be 11 or 12
      int len = 0;
      for (int i=0; i < 9; i++){ //Hardcoded value: 9 attempts at collecting data
           write(serial_fd, sendData, sendLen);
@@ -103,13 +103,14 @@ float UART::readLine(char* sendData, int sendLen){
 
 float UART::parseLine(unsigned char* data, int len){
      //TODO later: add checksum checking
-     int result = 0;
+     unsigned int result = 0;
      for (int i = 0; i < len; i++){
          if (data[i] == 0x4F && data[i+1] == 0x43){
-	      int MSB = data[i+2];
-	      int LSB = data[i+3];
-              result = (MSB << 8) + LSB; 
-              break; 
+	        unsigned int MSB = data[i+2];
+	     	unsigned int LSB = data[i+3];
+			//printf("%x,%x",MSB,LSB);
+            result = (MSB << 8) + LSB; 
+            break; 
          }
      }
      return result/10.0;
@@ -122,15 +123,13 @@ int UART::readLine(unsigned char* buf){
     
      //wait until the return character is detected - This is oxygen sensor specific
      int byteCount = 0;
-     while (data != 0x0D){
-          cout << "RAWR" << endl;
+     while (true){
           if (read(serial_fd,&c,1) > 0){
                buf[byteCount++] = c;
                data = c;
-               printf("%x", c);
+               //printf("%x ", c);
           }
           else break;
-          cout << "RAWR END" << endl;
      }   
      return byteCount;
 }

@@ -9,10 +9,10 @@ class MainWindow : public QWidget{
     Q_OBJECT
     public:
         explicit MainWindow(QWidget* parent = 0);
-	void updateO2(float percentage);
-    signals:
+   
         public slots:
-    
+        void updateO2(float percentage);
+        void updateFlow(float lpm);    
     private:
     QPushButton* up;
     QPushButton* down;

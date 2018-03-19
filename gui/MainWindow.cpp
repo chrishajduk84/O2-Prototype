@@ -51,3 +51,9 @@ void MainWindow::updateO2(float percentage){
 	sprintf(o2String,"%.1f%%",percentage);
 	oxygenfrac->setText(o2String);
 }
+
+void MainWindow::updateFlow(float lpm){
+    char flowString[7];
+    sprintf(flowString, "%.1fLPM", lpm);
+    flowrate->setText(flowString);
+}
