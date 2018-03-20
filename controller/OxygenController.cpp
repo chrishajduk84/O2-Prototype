@@ -6,6 +6,7 @@
 #include "GPIO.h"
 #include "PWM.h"
 #include "Valve.h"
+#include "Pump.h"
 #include <iostream>
 
 using namespace std;
@@ -14,6 +15,10 @@ OxygenController::OxygenController() : c1Sensor(1){
     QFuture<void> controlThread = QtConcurrent::run(this, &OxygenController::runLoop);
     Valve p(0);
     p.toggle(true);
+
+    Pump p1(6);
+    p1.toggle(true);
+
 }
 
 OxygenController::~OxygenController(){

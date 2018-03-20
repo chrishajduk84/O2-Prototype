@@ -14,5 +14,6 @@ static PeripheralLocation thermistor3Location[3] = {PeripheralLocation(0,0), Per
 static PeripheralLocation rtdLocation[3] = {PeripheralLocation(0,0), PeripheralLocation(0,0), PeripheralLocation(0,0)};
 static PeripheralLocation* temperatureLocation[4] = {thermistor1Location, thermistor2Location, thermistor3Location, rtdLocation};
 static PeripheralLocation flowLocation[3] = {PeripheralLocation(0,0), PeripheralLocation(0,0), PeripheralLocation(0,0)};
+static PeripheralLocation pumpLocation[4] = {PeripheralLocation(0x15, 6), PeripheralLocation(0x15, 7), PeripheralLocation(0x15,8), PeripheralLocation(0x15, 9)};
 
 #endif

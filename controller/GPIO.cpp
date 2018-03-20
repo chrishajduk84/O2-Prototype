@@ -33,16 +33,10 @@ using namespace std;
         }
     }
     void GPIO::toggle(bool _state){
-        int readAddress = READ_PIN_STATE;
-        int writeAddress = SET_PIN_STATE;
-        /*//Decide if LSB or MSB
-        if (pin > 7){
-            readAddress += 1;
-            writeAddress += 1;
-        }*/
-        int currentState = wiringPiI2CReadReg16(fd, readAddress);
-        currentState ^= (_state << pin);
-        wiringPiI2CWriteReg16(fd, writeAddress, currentState);
+        int currentState = wiringPiI2CReadReg16(fd, READ_PIN_STATE);
+        currentState &= ~(_state << pin); //Clear the entry
+        currentState |= (_state << pin); //Update the entry
+        wiringPiI2CWriteReg16(fd, SET_PIN_STATE, currentState);
         state = _state;
     }
     void GPIO::toggle(){

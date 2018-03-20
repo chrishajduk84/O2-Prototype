@@ -24,6 +24,7 @@ set ( SOURCES
      controller/GPIO.cpp
      controller/PWM.cpp
      controller/Valve.cpp
+     controller/Pump.cpp
       )
 
 set ( MOC_HEADERS
@@ -35,6 +36,7 @@ set ( MOC_HEADERS
        controller/GPIO.h
        controller/PWM.h
        controller/Valve.h
+       controller/Pump.h
       )
 #
 #   set ( UIS

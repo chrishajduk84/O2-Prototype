@@ -1,7 +1,11 @@
 #ifndef PUMP_H
 #define PUMP_H
 
-#include "O2-Cycler.h"
+#include "GPIO.h"
+
+#define NUM_CARTRIDGES 3
+
+
 
 class Pump{
     static unsigned int pinList[NUM_CARTRIDGES*2];

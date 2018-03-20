@@ -48,7 +48,6 @@ bool Pump::getState(){
     return pumpGPIO.getState();
 }
 
-
 //TODO: IMPLEMENT LATER
 void Pump::setPWM(int _duty){ //Hacks not really (hardware) PWM
   pwm = true;
