@@ -5,15 +5,17 @@
 
 class GPIO{
     bool state = false;
+    int pin = 0;
+
     public:
-    GPIO(int pinNumber)
+    GPIO(int pinNumber);
     ~GPIO();
     void toggle(bool _state);
     void toggle();
     bool getState();
     void setPWM(int _duty);
     void stopPWM();
-}
+};
 
 
 

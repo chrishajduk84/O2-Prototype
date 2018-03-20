@@ -19,6 +19,8 @@ set ( SOURCES
      controller/Sensors.cpp     
      controller/UART.cpp
      controller/OxygenController.cpp
+     controller/GPIO.cpp
+     controller/PWM.cpp
       )
 
 set ( MOC_HEADERS
@@ -27,6 +29,8 @@ set ( MOC_HEADERS
        controller/Pinout.h
        controller/UART.h
        controller/OxygenController.h
+       controller/GPIO.h
+       controller/PWM.h
       )
 #
 #   set ( UIS

@@ -7,25 +7,47 @@
 //TEMP FOR DEBUG
 #include <iostream>
 
-#define ADC0 0b1111111
-#define ADC1 0b1111111
+#define ADC0 0x48
+#define ADC1 0x49
 
-#define ADC_VERSION_REG 0b00000000
-#define ADC_VERSION 0b00000000
+char ADC_CHANNEL[8] = {0b10000000,
+                    0b11000000,
+                    0b10010000,
+                    0b11010000,
+                    0b10100000,
+                    0b11100000,
+                    0b10110000,
+                    0b11110000};
+
+#define ADC_POWERDOWN_BETWEEN 0b0000
+#define ADC_IREF_OFF_AD_ON 0b0100
+#define ADC_IREF_ON_AD_OFF 0b1000
+#define ADC_IREF_ON_AD_ON 0b1100
+
+#define IREF_TURNON 0b00001000
 
 using namespace std;
 
 Sensors::Sensors(int sensorIndex){
 	//Connect to I2C peripherals
-	wiringPiI2CSetup(1);	
-
-	//ADC0 - Verify Connection - check registers	
-	wiringPiI2CReadReg8(ADC0, ADC_VERSION_REG)==ADC_VERSION?sensorStatus.adc0=true:sensorStatus.adc0=false;
-
-	//ADC1 - Verify Connection - check registers
-	wiringPiI2CReadReg8(ADC1, ADC_VERSION_REG)==ADC_VERSION?sensorStatus.adc1=true:sensorStatus.adc1=false;
-
-	//Assign pointers
+	fd0 = wiringPiI2CSetup(ADC0);	
+    fd1 = wiringPiI2CSetup(ADC1);
+    
+    if (wiringPiI2CWrite(fd0, ADC_CHANNEL[0] | ADC_IREF_OFF_AD_ON) >= 0){ //-1 indicates an invalid file descriptor
+	    //ADC0 - Verify Connection - check registers	
+        //cout << wiringPiI2CReadReg16(fd0,0) << endl;
+	    sensorStatus.adc0=true;
+        cout << "[I2C] ADC0 detected" << endl;
+    }
+     
+    if (wiringPiI2CWrite(fd1, ADC_CHANNEL[0] | ADC_IREF_OFF_AD_ON) >= 0){
+	    //ADC1 - Verify Connection - check registers	
+        //cout << wiringPiI2CReadReg16(fd1,0) << endl;
+	    sensorStatus.adc1=true;
+        cout << "[I2C] ADC1 detected" << endl;
+    }
+       
+    //Assign pointers
 	pPressure = &(pressureLocation[sensorIndex]);
 	pTemperature1 = &(temperatureLocation[0][sensorIndex]);
 	pTemperature2 = &(temperatureLocation[1][sensorIndex]);
@@ -45,7 +67,14 @@ Sensors::Sensors(int sensorIndex){
 Sensors::~Sensors(){}
 
 float Sensors::getPressure(){
-	csData.pressure = 5;
+    int filehandle = pPressure->i2cAddress == 0x48?fd0:fd1;
+    if (wiringPiI2CWrite(filehandle, ADC_CHANNEL[pPressure->pinNumber] | ADC_IREF_OFF_AD_ON) >= 0){
+        unsigned int readings = wiringPiI2CReadReg16(filehandle,0);
+        readings = ((readings & 0xFF) << 8) + ((readings & 0xFF00) >> 8); //Account for endianess
+        float pressure = readings*30.0/0b111111111111;
+        cout << "Press: " << pressure << endl;
+        printf("%x",readings);
+    }   	
   	return csData.pressure;
 }
 

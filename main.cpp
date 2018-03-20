@@ -23,7 +23,7 @@ int main(int argc, char** argv){
     QObject::connect(&oc, SIGNAL(updateOxygen(float)), &mw, SLOT(updateO2(float)), Qt::QueuedConnection);
     QObject::connect(&oc, SIGNAL(updateFlow(float)), &mw, SLOT(updateFlow(float)), Qt::QueuedConnection);
 
-    //TODO: Add way of concurrently running "controller"	
+    //TODO: Add a way to shutdown controller after application closes
 
     return app.exec();
 }

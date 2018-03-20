@@ -7,7 +7,7 @@ char pinNumber;
 _peripheralLocation(char i2c, char pin) : i2cAddress(i2c), pinNumber(pin){};
 } PeripheralLocation;
 
-static PeripheralLocation pressureLocation[3] = {PeripheralLocation(0,0), PeripheralLocation(0,0), PeripheralLocation(0,0)};
+static PeripheralLocation pressureLocation[3] = {PeripheralLocation(0x48,0), PeripheralLocation(0x48,1), PeripheralLocation(0x48,2)};
 static PeripheralLocation thermistor1Location[3] = {PeripheralLocation(0,0), PeripheralLocation(0,0), PeripheralLocation(0,0)}; 
 static PeripheralLocation thermistor2Location[3] = {PeripheralLocation(0,0), PeripheralLocation(0,0), PeripheralLocation(0,0)};
 static PeripheralLocation thermistor3Location[3] = {PeripheralLocation(0,0), PeripheralLocation(0,0), PeripheralLocation(0,0)};

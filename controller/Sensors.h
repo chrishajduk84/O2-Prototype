@@ -27,6 +27,7 @@ class Sensors {
 	PeripheralLocation *pPressure, *pTemperature1, *pTemperature2, *pTemperature3, *pRTD, *pFlow, *pO2;
   	CartridgeSensors csData;
 	const static int N = 10; 
+    int fd0, fd1;
 
 	UART oxygenSensor;
 	 
