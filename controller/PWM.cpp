@@ -46,7 +46,6 @@ using namespace std;
         if (wiringPiI2CWriteReg8(pwmFD, SET_ON_OFF+2, (int)(currentState & 0xFF0000) >> 16) < 0) cout << "[I2C] Error sending PWM update";
         if (wiringPiI2CWriteReg8(pwmFD, SET_ON_OFF+3, (int)((currentState & 0xFF000000) >> 24)) < 0) cout << "[I2C] Error sending PWM update";
 
-
         state = _state;
     }
     void PWM::toggle(){
@@ -60,7 +59,10 @@ using namespace std;
     }
 
     int PWM::getDuty(){
-        return wiringPiI2CReadReg8(pwmFD, pwmArray[pin]);
+        int duty;
+        duty = wiringPiI2CReadReg8(pwmFD, pwmArray[pin]);
+        return duty;
+
     }
 
     void PWM::setDuty(int _duty){

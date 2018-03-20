@@ -1,6 +1,7 @@
 #ifndef PWM_H
 #define PWM_H
 
+#include "OxygenController.h"
 #include <wiringPiI2C.h>
 
 class PWM{

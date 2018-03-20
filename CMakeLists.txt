@@ -11,6 +11,8 @@ else ()
   set (CMAKE_CXX_STANDARD 11)
 endif ()
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+
 # declaring files in your project
 
 set ( SOURCES
@@ -21,6 +23,7 @@ set ( SOURCES
      controller/OxygenController.cpp
      controller/GPIO.cpp
      controller/PWM.cpp
+     controller/Valve.cpp
       )
 
 set ( MOC_HEADERS
@@ -31,6 +34,7 @@ set ( MOC_HEADERS
        controller/OxygenController.h
        controller/GPIO.h
        controller/PWM.h
+       controller/Valve.h
       )
 #
 #   set ( UIS

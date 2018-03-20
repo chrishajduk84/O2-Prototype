@@ -5,20 +5,19 @@
 
 #include "GPIO.h"
 #include "PWM.h"
+#include "Valve.h"
 #include <iostream>
 
 using namespace std;
 
 OxygenController::OxygenController() : c1Sensor(1){
     QFuture<void> controlThread = QtConcurrent::run(this, &OxygenController::runLoop);
-    PWM p(0);
-    p.setDuty(25);
+    Valve p(0);
     p.toggle(true);
-    p.getState();
 }
 
 OxygenController::~OxygenController(){
-
+    
 }
 
 void OxygenController::runLoop(){

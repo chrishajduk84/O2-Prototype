@@ -2,7 +2,7 @@
 #define OXYGENCONTROLLER_H
 
 #include <QObject>
-
+#include <thread>
 #include "Sensors.h"
 
 class OxygenController : public QObject{
@@ -12,6 +12,7 @@ class OxygenController : public QObject{
     OxygenController();
     ~OxygenController();
     
+
     private:  
     Sensors c1Sensor;
     //Sensors c2Sensor;

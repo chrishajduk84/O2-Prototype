@@ -1,5 +1,5 @@
 #include "Sensors.h"
-
+#include "OxygenController.h"
 #include <wiringPiI2C.h>
 #include <math.h>
 
@@ -62,6 +62,7 @@ Sensors::Sensors(int sensorIndex){
 	for (int i = 0; i < 4; i++){
   		csData.temperature[i] = 30;      //First value for rolling avg. [to prevent dividing by 0]
 	}
+
 }
 
 Sensors::~Sensors(){}
@@ -74,7 +75,7 @@ float Sensors::getPressure(){
         float pressure = readings*30.0/0b111111111111;
         cout << "Press: " << pressure << endl;
         printf("%x",readings);
-    }   	
+    } 
   	return csData.pressure;
 }
 

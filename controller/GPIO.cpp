@@ -40,7 +40,6 @@ using namespace std;
             readAddress += 1;
             writeAddress += 1;
         }*/
-        
         int currentState = wiringPiI2CReadReg16(fd, readAddress);
         currentState ^= (_state << pin);
         wiringPiI2CWriteReg16(fd, writeAddress, currentState);
