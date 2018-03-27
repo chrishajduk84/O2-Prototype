@@ -1,26 +1,21 @@
 #include "Column.h"
 #include <stdlib.h>
 
-//These are static!!!
-Column* Column::cList[NUM_CARTRIDGES];
-unsigned int Column::listLength;
-
-
-Column* Column::getById(unsigned int id){
+/*Column* Column::getById(unsigned int id){
     if (id > 0)
         return cList[id-1];
     else
         return 0;
-}
+}*/
 
-Column::Column(unsigned int id):heater(heaterPinout[id-1]),cooler(coolerPinout[id-1]),valve(valvePinout[id-1]),pA(pAPinout[id-1]),pB(pBPinout[id-1]),cartridgeSensors(id-1){
-    //Assign a reference in a static array
+Column::Column(unsigned int id){
+    /*//Assign a reference in a static array
     if (id <= NUM_CARTRIDGES){
         if (!cList[id-1]){
             cList[id-1] = this;
         }
         else{
-            cout << "Initialized Cartridge Already Exists!" << endl;
+            cout << "Initialized Column Already Exists!" << endl;
         }
 
         heaterPID.setSensorSource(&cartridgeSensors.getSensorData()->temperature);
@@ -35,19 +30,26 @@ Column::Column(unsigned int id):heater(heaterPinout[id-1]),cooler(coolerPinout[i
         cID = id;       
         //Do things with the queue?
     }
+    */
 }
 
-Cartridge::~Cartridge(){
-    //Remove all entries in static variables
-    for (int i = 0; i < listLength; i++){
-        if (cList[i] == this){
-            cList[i] = 0;
-            break;
-        }
-    }
+Column::~Column(){
 }
 
-void Cartridge::setTestQueue(TestQueue* tq){
+int Column::getHeatingTime(){
+    return 0;
+}
+
+int Column::getCoolingTime(){
+    return 0;
+}
+
+int Column::getCycle(){
+    return 0;
+}
+
+
+/*void Column::setTestQueue(TestQueue* tq){
   tQueue = *tq;
   if (tQueue.size() > 0){
     heaterPID.setOutput(&heater,&heater.setPWM);
@@ -61,8 +63,8 @@ void Cartridge::setTestQueue(TestQueue* tq){
   }
 }
 
-void Cartridge::update(){
-    //Update Sensor Data
+void Column::update(){
+/*    //Update Sensor Data
     cartridgeSensors.updateSensors();
     
     //If all tests have finished put the device into a safe state 
@@ -122,7 +124,5 @@ void Cartridge::update(){
 
     }
     lastLoopTime = myMillis();
-}
-Test Cartridge::getCurrentTest(){
-  return *currentTest;
-}
+}*/
+

@@ -26,6 +26,8 @@ char ADC_CHANNEL[8] = {0b10000000,
 
 #define IREF_TURNON 0b00001000
 
+DeviceStatus Sensors::sensorStatus;
+
 using namespace std;
 
 Sensors::Sensors(int sensorIndex){
@@ -33,31 +35,28 @@ Sensors::Sensors(int sensorIndex){
 	fd0 = wiringPiI2CSetup(ADC0);	
     fd1 = wiringPiI2CSetup(ADC1);
     
-    if (wiringPiI2CWrite(fd0, ADC_CHANNEL[0] | ADC_IREF_OFF_AD_ON) >= 0){ //-1 indicates an invalid file descriptor
-	    //ADC0 - Verify Connection - check registers	
-        //cout << wiringPiI2CReadReg16(fd0,0) << endl;
+    if (!sensorStatus.adc0 && wiringPiI2CWrite(fd0, ADC_CHANNEL[0] | ADC_POWERDOWN_BETWEEN) >= 0){ //-1 indicates an invalid file descriptor
 	    sensorStatus.adc0=true;
         cout << "[I2C] ADC0 detected" << endl;
     }
      
-    if (wiringPiI2CWrite(fd1, ADC_CHANNEL[0] | ADC_IREF_OFF_AD_ON) >= 0){
-	    //ADC1 - Verify Connection - check registers	
-        //cout << wiringPiI2CReadReg16(fd1,0) << endl;
+    if (!sensorStatus.adc1 && wiringPiI2CWrite(fd1, ADC_CHANNEL[0] | ADC_POWERDOWN_BETWEEN) >= 0){
 	    sensorStatus.adc1=true;
         cout << "[I2C] ADC1 detected" << endl;
     }
        
     //Assign pointers
 	pPressure = &(pressureLocation[sensorIndex]);
-	pTemperature1 = &(temperatureLocation[0][sensorIndex]);
-	pTemperature2 = &(temperatureLocation[1][sensorIndex]);
-	pTemperature3 = &(temperatureLocation[2][sensorIndex]);
-	pRTD = &(rtdLocation[sensorIndex]);
-	pFlow = &(flowLocation[sensorIndex]);
+	pTemperature[0] = &(temperatureLocation[0][sensorIndex]);
+    pTemperature[1] = &(temperatureLocation[1][sensorIndex]);
+    pTemperature[2] = &(temperatureLocation[2][sensorIndex]);
+    pTemperature[3] = &(rtdLocation[sensorIndex]);
+	pFlow = &flowLocation;
 		
 	//Oxygen determine via UART - Check for connection
-	oxygenSensor.isConnected()?sensorStatus.oxygen=true:sensorStatus.oxygen=false;
-		//List which sensors are available in DEBUG
+	if (!sensorStatus.oxygen && oxygenSensor.isConnected()){
+        sensorStatus.oxygen=true;
+    }
 	
 	for (int i = 0; i < 4; i++){
   		csData.temperature[i] = 30;      //First value for rolling avg. [to prevent dividing by 0]
@@ -69,21 +68,33 @@ Sensors::~Sensors(){}
 
 float Sensors::getPressure(){
     int filehandle = pPressure->i2cAddress == 0x48?fd0:fd1;
-    if (wiringPiI2CWrite(filehandle, ADC_CHANNEL[pPressure->pinNumber] | ADC_IREF_OFF_AD_ON) >= 0){
+    if (wiringPiI2CWrite(filehandle, ADC_CHANNEL[pPressure->pinNumber] | ADC_POWERDOWN_BETWEEN) >= 0){
         unsigned int readings = wiringPiI2CReadReg16(filehandle,0);
         readings = ((readings & 0xFF) << 8) + ((readings & 0xFF00) >> 8); //Account for endianess
         float pressure = readings*30.0/0b111111111111;
         cout << "Press: " << pressure << endl;
-        printf("%x",readings);
+        csData.pressure = pressure;
     } 
   	return csData.pressure;
 }
 
 float Sensors::getTemperature(int index){
-  	csData.temperature[index] -= csData.temperature[index]/N;               //Rolling Average
+  	int filehandle = pTemperature[index]->i2cAddress == 0x48?fd0:fd1;
+    printf("%x,", ADC_CHANNEL[pTemperature[index]->pinNumber]);
+    if (wiringPiI2CWrite(filehandle, ADC_CHANNEL[pTemperature[index]->pinNumber] | ADC_POWERDOWN_BETWEEN) >= 0){
+        printf("PIN:%d",pTemperature[index]->pinNumber);  
+        unsigned int readings = wiringPiI2CReadReg16(filehandle,0);
+        readings = ((readings & 0xFF) << 8) + ((readings & 0xFF00) >> 8); //Flip endianness
+        float temperature = 300.1338725/pow(((float)readings/3083),0.0913472958930)-273;
+        cout << "Temp" << index << ": " << temperature << endl;
+        csData.temperature[index] = temperature;
+    }
+    return csData.temperature[index];
+    
+   /* csData.temperature[index] -= csData.temperature[index]/N;               //Rolling Average
 	csData.temperature[index] += 1/N;    //[Exponentially Weighted] TODO: REPLACE "1" with the thermistor reading
   	if (isnan(csData.temperature[index])){csData.temperature[index] = 1;}  //TODO: REPLACE"1" WITH THE THERMISTOR READING - Flushes out rolling average if "not a number" val corrupts the average
-  	return csData.temperature[index];
+  	return csData.temperature[index];*/
 }
 
 float Sensors::getFlow(){

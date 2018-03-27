@@ -16,8 +16,8 @@ MainWindow::MainWindow(QWidget* parent):QWidget(parent){
     
     const QImage upArrow(UpArrowData,457,257,QImage::Format_RGB888);
     const QImage downArrow(UpArrowData,257,457,QImage::Format_RGB888);//257,457
-    QPixmap upArrowPM = QPixmap::fromImage(upArrow);//("img/UpArrow.png");
-    QPixmap downArrowPM = QPixmap::fromImage(downArrow);//("img/DownArrow.png");
+    QPixmap upArrowPM("img/UpArrow.png");// = QPixmap::fromImage(upArrow);//("img/UpArrow.png");
+    QPixmap downArrowPM("img/DownArrow.png");// = QPixmap::fromImage(downArrow);//("img/DownArrow.png");
     //upArrowPM.convertFromImage(upArrow);
     //downArrowPM.convertFromImage(downArrow);
     QIcon upButtonIcon(upArrowPM);

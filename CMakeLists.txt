@@ -25,6 +25,9 @@ set ( SOURCES
      controller/PWM.cpp
      controller/Valve.cpp
      controller/Pump.cpp
+     controller/ThermalRelay.cpp
+     controller/Synchronizer.cpp
+     controller/Column.cpp
       )
 
 set ( MOC_HEADERS
@@ -37,6 +40,9 @@ set ( MOC_HEADERS
        controller/PWM.h
        controller/Valve.h
        controller/Pump.h
+       controller/ThermalRelay.h
+       controller/Synchronizer.h
+       controller/Column.h
       )
 #
 #   set ( UIS

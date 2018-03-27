@@ -13,7 +13,6 @@ typedef struct _deviceStatus{
 	bool adc0 = false;
 	bool adc1 = false;
 	bool oxygen = false;
-	
 } DeviceStatus;
 
 typedef struct _cartridgeSensors{
@@ -24,8 +23,10 @@ typedef struct _cartridgeSensors{
 } CartridgeSensors;
 
 class Sensors {
-	DeviceStatus sensorStatus;
-	PeripheralLocation *pPressure, *pTemperature1, *pTemperature2, *pTemperature3, *pRTD, *pFlow, *pO2;
+	static DeviceStatus sensorStatus;
+	PeripheralLocation *pPressure, *pRTD, *pFlow, *pO2;
+    PeripheralLocation *pTemperature[4];
+
   	CartridgeSensors csData;
 	const static int N = 10; 
     int fd0, fd1;
