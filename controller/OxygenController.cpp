@@ -19,9 +19,9 @@ OxygenController::OxygenController() : c0Sensor(0), c1Sensor(1), c2Sensor(2){
     Column c1(1);
     Column c2(2);
     Synchronizer* s_instance = Synchronizer::getInstance();
-    s_instance->addColumn(0,c0);
-    s_instance->addColumn(1,c1);
-    s_instance->addColumn(2,c2);
+    /*s_instance->addColumn(0,&c0);
+    s_instance->addColumn(1,&c1);
+    s_instance->addColumn(2,&c2);*/
     /*
     Valve p(0);
     p.toggle(true);
@@ -66,7 +66,7 @@ void OxygenController::runLoop(){
         //-Will need a way to synchronize the columns(dependent on feedback)
         //-Each synchronous column controls its own pumps,valves, heater and cooler to achieve synchronizer setpoint
         //*For now we will use a simple synchronizer
-        //mSynchronizer.update(); //Recursively updates columns
+        //Synchronizer::getInstance()->update(); //Recursively updates columns
                
         /*if ( ){ //break condition - power button?   
             

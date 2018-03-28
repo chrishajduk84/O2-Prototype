@@ -12,14 +12,32 @@
 #define HEATER_UPDATE_PERIOD 1000
 #define PUMP_UPDATE_PERIOD 1000
 
+typedef enum _CycleState{
+    INVALID = -1,
+    ABSORB = 1,
+    INTERMEDIATE_A = 2,
+    INTERMEDIATE_B = 3,
+    DESORB = 4,
+    INTERMEDIATE_C = 5
+} CycleState;
+
+typedef struct _ColumnSetpoints{
+    int cycles;
+    float temperature;
+    float inPressure;
+    float outPressure;
+    CycleState cycleState;
+} ColumnSetpoints;
+
 class Column{
-    //Test* currentTest;
     unsigned int cID;
     float heaterK[5] = {1000,1e-4,1,0,0};
     float pumpAK[5] = {100,1e-4,1,0,0};
     float pumpBK[5] = {-100,1e-4,1,0,0};
     long lastLoopTime = 0;
-    
+    ColumnSetpoints* cs;
+    ColumnSetpoints* initialCS;
+
     public:
     //Heater heater;
     //PID<Heater> heaterPID;
@@ -37,7 +55,13 @@ class Column{
     ~Column();
     int getHeatingTime();
     int getCoolingTime();
+    int getStateTime();
+    int getCycleTime();
     int getCycle();
+    float getTemperature();
+    float getPressure(); 
+    ColumnSetpoints* getSetpoints();
+    void updateSetpoints(ColumnSetpoints* _cs);
     //void setTestQueue(TestQueue* tq);
     //void update();
     //Test getCurrentTest();

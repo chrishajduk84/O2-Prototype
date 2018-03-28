@@ -80,12 +80,11 @@ float Sensors::getPressure(){
 
 float Sensors::getTemperature(int index){
   	int filehandle = pTemperature[index]->i2cAddress == 0x48?fd0:fd1;
-    printf("%x,", ADC_CHANNEL[pTemperature[index]->pinNumber]);
     if (wiringPiI2CWrite(filehandle, ADC_CHANNEL[pTemperature[index]->pinNumber] | ADC_POWERDOWN_BETWEEN) >= 0){
-        printf("PIN:%d",pTemperature[index]->pinNumber);  
         unsigned int readings = wiringPiI2CReadReg16(filehandle,0);
         readings = ((readings & 0xFF) << 8) + ((readings & 0xFF00) >> 8); //Flip endianness
-        float temperature = 300.1338725/pow(((float)readings/3083),0.0913472958930)-273;
+        readings -= 3083/2;//Calibration
+        float temperature = -1.51835*pow(10,-8)*pow(readings,3)+7.834*pow(10,-5)*pow(readings,2)-0.1608*readings+413.79166 - 273;
         cout << "Temp" << index << ": " << temperature << endl;
         csData.temperature[index] = temperature;
     }

@@ -89,7 +89,7 @@ void UART::writeLine(char* data, int len){
 float UART::readLine(char* sendData, int sendLen){
      unsigned char data[15];//Should be 11 or 12
      int len = 0;
-     for (int i=0; i < 9; i++){ //Hardcoded value: 9 attempts at collecting data
+     for (int i=0; i < 1; i++){ //Hardcoded value: 1 attempts at collecting data
           write(serial_fd, sendData, sendLen);
           len = readLine(data);
           if (len > 0){

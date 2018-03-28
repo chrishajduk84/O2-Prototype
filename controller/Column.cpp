@@ -1,5 +1,8 @@
 #include "Column.h"
 #include <stdlib.h>
+#include <iostream>
+
+using namespace std;
 
 /*Column* Column::getById(unsigned int id){
     if (id > 0)
@@ -9,6 +12,15 @@
 }*/
 
 Column::Column(unsigned int id){
+    //Starting conditions
+    cs = new ColumnSetpoints;
+    initialCS = cs; 
+    cs->cycles = 0;
+    cs->temperature = 0;
+    cs->inPressure = 0;
+    cs->outPressure = 0;
+    cs->cycleState = ABSORB; 
+    
     /*//Assign a reference in a static array
     if (id <= NUM_CARTRIDGES){
         if (!cList[id-1]){
@@ -34,6 +46,7 @@ Column::Column(unsigned int id){
 }
 
 Column::~Column(){
+    delete initialCS;
 }
 
 int Column::getHeatingTime(){
@@ -44,10 +57,35 @@ int Column::getCoolingTime(){
     return 0;
 }
 
+int Column::getStateTime(){
+    return 0;
+}
+
+int Column::getCycleTime(){
+    return 0;   
+}
+
 int Column::getCycle(){
     return 0;
 }
 
+float Column::getTemperature(){
+    return 0;
+}
+
+float Column::getPressure(){
+    return 0;
+}
+
+
+ColumnSetpoints* Column::getSetpoints(){
+    cout << "INSIDE" << cs->temperature << endl;
+    return cs;           
+}
+
+void Column::updateSetpoints(ColumnSetpoints* _cs){
+    cs = _cs;
+}
 
 /*void Column::setTestQueue(TestQueue* tq){
   tQueue = *tq;
