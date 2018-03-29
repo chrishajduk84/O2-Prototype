@@ -34,7 +34,7 @@ using namespace std;
     }
     void GPIO::toggle(bool _state){
         int currentState = wiringPiI2CReadReg16(fd, READ_PIN_STATE);
-        currentState &= ~(_state << pin); //Clear the entry
+        currentState &= ~(1 << pin); //Clear the entry
         currentState |= (_state << pin); //Update the entry
         wiringPiI2CWriteReg16(fd, SET_PIN_STATE, currentState);
         state = _state;

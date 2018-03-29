@@ -1,11 +1,11 @@
 #include "ThermalRelay.h"
-#include "Pump.h"
 #include <stdlib.h>
+#include <iostream>
 
 //These are static!!!
-unsigned int ThermalRelay::pinList[NUM_CARTRIDGES];
+unsigned int ThermalRelay::pinList[NUM_CARTRIDGES*2];
 unsigned int ThermalRelay::listLength;
-ThermalRelay* ThermalRelay::heaterList[NUM_CARTRIDGES];
+ThermalRelay* ThermalRelay::relayList[NUM_CARTRIDGES*2];
 
 /* 
 unsigned long int timer = 0;
@@ -14,12 +14,12 @@ ISR(TIMER5_OVF_vect)   // timer compare interrupt service routine
   timer += 1;
   /************HEATER****************
   for (int i = 0; i < ThermalRelay::listLength; i++){
-    if (ThermalRelay::heaterList[i]->pwm){
-      if (timer%100 < ((ThermalRelay::heaterList[i]->duty)*ThermalRelay::heaterList[i]->heatingFactor)){
-        ThermalRelay::heaterList[i]->toggle(true);
+    if (ThermalRelay::relayList[i]->pwm){
+      if (timer%100 < ((ThermalRelay::relayList[i]->duty)*ThermalRelay::relayList[i]->heatingFactor)){
+        ThermalRelay::relayList[i]->toggle(true);
       }
       else{
-        ThermalRelay::heaterList[i]->toggle(false);
+        ThermalRelay::relayList[i]->toggle(false);
       }
     }
   }
@@ -42,11 +42,12 @@ ThermalRelay::ThermalRelay(unsigned int _togglePin):thermalGPIO(_togglePin){
     //Assign the heating pin to the object
     for (int i = 0; i < listLength; i++){
         if (pinList[i] == _togglePin){
+            std::cout << "Runtime Error: Reinstantiation of GPIO:" << _togglePin << std::endl;
             exit(1);
         }
     }
     //If the heating pin hasn't already been initialized, add it to the list
-    heaterList[listLength] = this;
+    relayList[listLength] = this;
     pinList[listLength++] = togglePin = _togglePin;
 }
 

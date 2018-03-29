@@ -8,7 +8,6 @@
 #include <thread>
 
 #include "gui/MainWindow.h"
-#include "controller/Sensors.h"
 #include "controller/OxygenController.h"
 
 using namespace std;

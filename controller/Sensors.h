@@ -40,6 +40,7 @@ class Sensors {
 	float getPressure();
 	void printPressure();
 	float getTemperature(int index);
+    float getAvgTemperature();
 	void printTemperature(int index);
 	float getFlow();
 	void printFlow();

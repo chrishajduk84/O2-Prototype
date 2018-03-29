@@ -17,10 +17,9 @@ void Synchronizer::addColumn(int index, Column* c){
 }
 
 void Synchronizer::update(){
-    cout << "SYNC" << endl;
     int calcPeriod = 0;
     for (int i=0; i < NUM_COLUMN; i++){
-        cout << "UPDATE" << endl; 
+        cList[i]->update(); //Update each column - controls of valves/pumps/etc.
         //Update Sync data
         if (previousState[i].cycle < cList[i]->getCycle() ){ //Only update predictions when necessary
             //HEATING TIME
@@ -44,9 +43,7 @@ void Synchronizer::update(){
             calcPeriod += (previousState[i].HeatingTime + previousState[i].CoolingTime);
         }
         if (calcPeriod != currentPeriod) calcPeriod = currentPeriod;
-        cout << cList[0]->getPressure() << endl;
-        cout << cList[2]->getPressure() << endl;
-        cout << "PART2" << endl;
+
         //ABSORPTION/DESORPTION MODEL TO BE USED SOMEWHERE HERE
         //The model should probably calculate the mSettings variable and the phase should modify it to keep all systems in sync 
         //Decide when and where to switch states. Also need to change setpoints to increase/decrease phase
@@ -56,11 +53,9 @@ void Synchronizer::update(){
         //TODO: Generate mSettings
 
         for (int i = 0; i < NUM_COLUMN; i++){
-            cout << i<<":" << endl;
             ColumnSetpoints* cs = cList[i]->getSetpoints();
-            cout << "T" <<  cs->temperature << endl;
-            if (cs->cycleState == ABSORB){
-                cout << "ABSORB" << endl;
+            cout << cList[i]->getTemperature() << endl;
+            if (cs->cycleState == ABSORB){ 
                 //SWITCHING CONDITIONS - At the end of the absorption state switch to the intermediate state
                 if (((cList[i]->getTemperature() <= cs->temperature) && (cList[i]->getStateTime() >= mSettings.minCoolingTime)) || cList[i]->getStateTime() >= mSettings.maxCoolingTime){ //+- PhaseControl (add it to minCoolingTime, to extend Period to match other columns)
                     cs->cycleState = INTERMEDIATE_A;
@@ -121,11 +116,8 @@ void Synchronizer::update(){
             else {
                 //Update Setpoints - Start with absorption state
                 cout << "ELSE" << i << endl;
-                cout << cs->cycleState;
                 cs->cycleState = ABSORB;
-                cout << "," << endl;
                 cList[i]->updateSetpoints(cs);
-                cout << "ELSE2" << i << endl;
             }
         }
     }    

@@ -6,7 +6,7 @@
 #define NUM_CARTRIDGES 3
 
 class ThermalRelay{
-    static unsigned int pinList[NUM_CARTRIDGES];
+    static unsigned int pinList[NUM_CARTRIDGES*2];
     unsigned int togglePin;
     bool state;
     GPIO thermalGPIO;
@@ -16,7 +16,7 @@ class ThermalRelay{
     int duty;
     float heatingFactor = 1;
     static unsigned int listLength;
-    static ThermalRelay* heaterList[NUM_CARTRIDGES];
+    static ThermalRelay* relayList[NUM_CARTRIDGES*2];
     ThermalRelay(unsigned int _togglePin);
     ~ThermalRelay();
     void toggle();

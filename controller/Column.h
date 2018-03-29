@@ -1,13 +1,14 @@
-#ifndef CARTRIDGE_H
-#define CARTRIDGE_H
+#ifndef COLUMN_H
+#define COLUMN_H
 
-//#include "Heater.h"
+#include "ThermalRelay.h"
 //#include "Valve.h"
 //#include "Pump.h"
 //#include "TestQueue.h"
 //#include "PID.h"
 //#include "BangBang.h"
-//#include "Sensors.h"
+#include "Sensors.h"
+#include <chrono>
 
 #define HEATER_UPDATE_PERIOD 1000
 #define PUMP_UPDATE_PERIOD 1000
@@ -34,12 +35,21 @@ class Column{
     float heaterK[5] = {1000,1e-4,1,0,0};
     float pumpAK[5] = {100,1e-4,1,0,0};
     float pumpBK[5] = {-100,1e-4,1,0,0};
-    long lastLoopTime = 0;
+    std::chrono::milliseconds stateTime = std::chrono::milliseconds(0);
+    std::chrono::milliseconds cycleTime = std::chrono::milliseconds(0);
+    std::chrono::milliseconds heatTime = std::chrono::milliseconds(0);
+    std::chrono::milliseconds coolTime = std::chrono::milliseconds(0); 
+    std::chrono::milliseconds columnUpdateTime = std::chrono::milliseconds(0);
+    std::chrono::system_clock::time_point lastUpdateTimePoint;
+    CycleState lastCycleState = INVALID;
+
     ColumnSetpoints* cs;
     ColumnSetpoints* initialCS;
 
     public:
-    //Heater heater;
+    Sensors cSensors;
+    ThermalRelay heater;
+    ThermalRelay cooler;
     //PID<Heater> heaterPID;
     //Valve vA; //2 Way
     //Valve vB; //2 Way
@@ -48,7 +58,6 @@ class Column{
     //PID<Pump> pumpAPID;
     //Pump pB;    //Vacuum
     //PID<Pump> pumpBPID;
-    //Sensors cartridgeSensors; //All Sensors
     //TestQueue tQueue;
     //static Cartridge* getById(unsigned int id);
     Column(unsigned int id);
@@ -62,8 +71,7 @@ class Column{
     float getPressure(); 
     ColumnSetpoints* getSetpoints();
     void updateSetpoints(ColumnSetpoints* _cs);
-    //void setTestQueue(TestQueue* tq);
-    //void update();
+    void update();
     //Test getCurrentTest();
 };
 

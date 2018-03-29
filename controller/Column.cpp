@@ -1,4 +1,5 @@
 #include "Column.h"
+#include "Pinout.h"
 #include <stdlib.h>
 #include <iostream>
 
@@ -11,16 +12,17 @@ using namespace std;
         return 0;
 }*/
 
-Column::Column(unsigned int id){
+Column::Column(unsigned int id) : cSensors(id), heater(heaterLocation[id].pinNumber), cooler(coolerLocation[id].pinNumber){
     //Starting conditions
-    cs = new ColumnSetpoints;
-    initialCS = cs; 
+    initialCS = cs = new ColumnSetpoints; 
     cs->cycles = 0;
     cs->temperature = 0;
     cs->inPressure = 0;
     cs->outPressure = 0;
-    cs->cycleState = ABSORB; 
-    
+    cs->cycleState = ABSORB;
+     
+    lastUpdateTimePoint = chrono::system_clock::now(); 
+
     /*//Assign a reference in a static array
     if (id <= NUM_CARTRIDGES){
         if (!cList[id-1]){
@@ -50,27 +52,27 @@ Column::~Column(){
 }
 
 int Column::getHeatingTime(){
-    return 0;
+    return heatTime.count();
 }
 
 int Column::getCoolingTime(){
-    return 0;
+    return coolTime.count();
 }
 
 int Column::getStateTime(){
-    return 0;
+    return stateTime.count();
 }
 
 int Column::getCycleTime(){
-    return 0;   
+    return cycleTime.count();   
 }
 
 int Column::getCycle(){
-    return 0;
+    return cs->cycles;
 }
 
 float Column::getTemperature(){
-    return 0;
+    return cSensors.getAvgTemperature();
 }
 
 float Column::getPressure(){
@@ -79,7 +81,6 @@ float Column::getPressure(){
 
 
 ColumnSetpoints* Column::getSetpoints(){
-    cout << "INSIDE" << cs->temperature << endl;
     return cs;           
 }
 
@@ -99,12 +100,47 @@ void Column::updateSetpoints(ColumnSetpoints* _cs){
     pumpBPID.setSetpointSource(&currentTest->getTestSetpoints()->outPressure);
     heater.setMaxPower(currentTest->getTestParameters()->heatingPower);
   }
-}
+}*/
 
 void Column::update(){
-/*    //Update Sensor Data
-    cartridgeSensors.updateSensors();
-    
+    //Update Time parameters - Time since beginning of cycle, time since beginning of state, time since heating began, time since cooling began
+    columnUpdateTime = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - lastUpdateTimePoint);
+    lastUpdateTimePoint = chrono::system_clock::now();
+    stateTime += columnUpdateTime;
+    cycleTime += columnUpdateTime;
+
+    if (cs->cycleState == INTERMEDIATE_C) coolTime += columnUpdateTime;
+    if (cs->cycleState == INTERMEDIATE_A || cs->cycleState == INTERMEDIATE_B) heatTime +=columnUpdateTime;       
+
+    //Update Sensor Data - DO WE NEED THIS HERE? Or update each sensor as needed? Polling?
+    //cSensors.updateSensors();
+
+    if (lastCycleState != cs->cycleState){ //Only run this if statement section if things have changed  (state-wise)
+        lastCycleState = cs->cycleState;
+        stateTime -= stateTime; //reset to 0
+        if (cs->cycleState == ABSORB){
+            heater.toggle(false);
+            cooler.toggle(true);
+        } 
+        else if (cs->cycleState == INTERMEDIATE_A){
+            heater.toggle(true);
+            cooler.toggle(false);
+        }
+        else if (cs->cycleState == INTERMEDIATE_B){
+            heater.toggle(true);
+            cooler.toggle(false);
+        }
+        else if (cs->cycleState == DESORB){
+            heater.toggle(true);
+            cooler.toggle(false);
+        }
+        else if (cs->cycleState == INTERMEDIATE_C){
+            heater.toggle(false);
+            cooler.toggle(true);       
+        }   
+
+    }
+/*    
     //If all tests have finished put the device into a safe state 
     if (tQueue.size() <= 0){ //If the test queue is empty, put the cartridge in to a safe state and return
       pumpAPID.toggle(false); pumpBPID.toggle(false);heaterPID.toggle(false);
@@ -161,6 +197,6 @@ void Column::update(){
     } else{
 
     }
-    lastLoopTime = myMillis();
-}*/
+    lastLoopTime = myMillis(); */
+}
 

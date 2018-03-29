@@ -18,32 +18,32 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 set ( SOURCES
      main.cpp
      gui/MainWindow.cpp
+     controller/GPIO.cpp
      controller/Sensors.cpp     
      controller/UART.cpp
      controller/OxygenController.cpp
-     controller/GPIO.cpp
      controller/PWM.cpp
      controller/Valve.cpp
      controller/Pump.cpp
      controller/ThermalRelay.cpp
+     controller/Column.cpp 
      controller/Synchronizer.cpp
-     controller/Column.cpp
-      )
+     )
 
 set ( MOC_HEADERS
        gui/MainWindow.h
        controller/Sensors.h
        controller/Pinout.h
        controller/UART.h
-       controller/OxygenController.h
        controller/GPIO.h
+       controller/OxygenController.h
        controller/PWM.h
        controller/Valve.h
        controller/Pump.h
        controller/ThermalRelay.h
-       controller/Synchronizer.h
        controller/Column.h
-      )
+       controller/Synchronizer.h
+       )
 #
 #   set ( UIS
 #        mainwindow.ui

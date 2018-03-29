@@ -1,7 +1,6 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#include "OxygenController.h"
 #include <wiringPiI2C.h>
 
 class GPIO{

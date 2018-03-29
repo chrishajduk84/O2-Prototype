@@ -83,17 +83,27 @@ float Sensors::getTemperature(int index){
     if (wiringPiI2CWrite(filehandle, ADC_CHANNEL[pTemperature[index]->pinNumber] | ADC_POWERDOWN_BETWEEN) >= 0){
         unsigned int readings = wiringPiI2CReadReg16(filehandle,0);
         readings = ((readings & 0xFF) << 8) + ((readings & 0xFF00) >> 8); //Flip endianness
-        readings -= 3083/2;//Calibration
+        //readings *= 3.059;//Calibration
         float temperature = -1.51835*pow(10,-8)*pow(readings,3)+7.834*pow(10,-5)*pow(readings,2)-0.1608*readings+413.79166 - 273;
-        cout << "Temp" << index << ": " << temperature << endl;
-        csData.temperature[index] = temperature;
+        //cout << "Temp" << index << ": " << temperature << "," << readings << endl;
+        
+        csData.temperature[index] -= csData.temperature[index]/N;               //Rolling Average
+	    csData.temperature[index] += temperature/N;    //[Exponentially Weighted] TODO: REPLACE "1" with the thermistor reading
+  	    if (isnan(csData.temperature[index])){csData.temperature[index] = temperature;}  //TODO: REPLACE"1" WITH THE THERMISTOR READING - Flushes out rolling average if "not a number" val corrupts the average
     }
     return csData.temperature[index];
     
-   /* csData.temperature[index] -= csData.temperature[index]/N;               //Rolling Average
-	csData.temperature[index] += 1/N;    //[Exponentially Weighted] TODO: REPLACE "1" with the thermistor reading
-  	if (isnan(csData.temperature[index])){csData.temperature[index] = 1;}  //TODO: REPLACE"1" WITH THE THERMISTOR READING - Flushes out rolling average if "not a number" val corrupts the average
-  	return csData.temperature[index];*/
+
+}
+
+float Sensors::getAvgTemperature(){
+    float tAverage = 0;
+    int tempCount = 0;
+    for (int i = 0; i < 4; i++){
+        tAverage += getTemperature(i);
+        if (csData.temperature <= 0) tempCount++;
+    }
+    return tAverage/(4-tempCount);
 }
 
 float Sensors::getFlow(){
@@ -103,12 +113,12 @@ float Sensors::getFlow(){
 
 float Sensors::getO2(){
 	char sendCommand[9] = {0x55,0xAA,0x7E,0x02,0x4F,0x43,0x94,0x0E,0x0D};
-        csData.O2 = oxygenSensor.readLine(sendCommand,9);
+    csData.O2 = oxygenSensor.readLine(sendCommand,9);
   	return csData.O2;
 }
 
 CartridgeSensors* Sensors::getSensorData(){
-  return &csData;
+    return &csData;
 }
 
 void Sensors::updateSensors(){
@@ -119,4 +129,3 @@ void Sensors::updateSensors(){
   	getFlow();
   	getO2();
 }
-

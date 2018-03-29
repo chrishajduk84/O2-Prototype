@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <thread>
-#include "Sensors.h"
+//#include "Sensors.h"
 #include "Synchronizer.h"
 
 class OxygenController : public QObject{
@@ -14,10 +14,6 @@ class OxygenController : public QObject{
     ~OxygenController();
     
     private:  
-    Sensors c0Sensor;
-    Sensors c1Sensor;
-    Sensors c2Sensor;
-
     void runLoop();
 
     signals:
